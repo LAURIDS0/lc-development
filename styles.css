@@ -1,12 +1,12 @@
 :root {
-  --bg: #07101f;
-  --panel: rgba(15, 21, 38, 0.84);
-  --panel-border: rgba(255, 255, 255, 0.08);
+  --bg: #08111d;
+  --panel: rgba(17, 24, 41, 0.62);
+  --panel-border: rgba(255, 255, 255, 0.06);
   --text: #edf3ff;
-  --muted: #a3afcc;
+  --muted: #98a6c2;
   --accent: #7c8cff;
   --accent-2: #56d6c6;
-  --shadow: 0 24px 90px rgba(0, 0, 0, 0.36);
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
 }
 
 * {
@@ -22,8 +22,8 @@ body {
   font-family: Inter, system-ui, sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(124, 140, 255, 0.26), transparent 30%),
-    radial-gradient(circle at top right, rgba(86, 214, 198, 0.18), transparent 26%),
+    radial-gradient(circle at top left, rgba(124, 140, 255, 0.18), transparent 28%),
+    radial-gradient(circle at top right, rgba(86, 214, 198, 0.12), transparent 24%),
     linear-gradient(180deg, #050913 0%, var(--bg) 100%);
   min-height: 100vh;
 }
@@ -36,7 +36,7 @@ a {
 .page {
   width: min(1240px, calc(100% - 24px));
   margin: 0 auto;
-  padding: 26px 0 44px;
+  padding: 22px 0 40px;
 }
 
 .store-header {
@@ -44,7 +44,7 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   padding: 4px 2px;
 }
 
@@ -79,15 +79,15 @@ a {
 }
 
 .hero {
-  border-radius: 22px;
-  padding: 22px;
-  margin-bottom: 14px;
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
 }
 
 .product-shell {
-  border-radius: 22px;
+  border-radius: 18px;
   overflow: hidden;
-  padding: 18px;
+  padding: 16px;
 }
 
 .catalog-head {
@@ -95,7 +95,7 @@ a {
   justify-content: space-between;
   gap: 16px;
   align-items: end;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
@@ -147,27 +147,27 @@ h1 {
 .scripts-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .script-card {
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .script-card-top {
   min-height: 0;
   position: relative;
   background:
-    radial-gradient(circle at top, rgba(124, 140, 255, 0.24), transparent 45%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+    radial-gradient(circle at top, rgba(124, 140, 255, 0.18), transparent 45%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
   padding: 0;
 }
 
 .script-card-body {
-  padding: 14px;
+  padding: 16px;
 }
 
 .product-tags {
@@ -257,10 +257,10 @@ h1 {
 
 .readme-block {
   margin-top: 0;
-  padding: 14px;
-  border-radius: 0 0 22px 22px;
-  background: rgba(0, 0, 0, 0.18);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px;
+  border-radius: 0 0 16px 16px;
+  background: rgba(0, 0, 0, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .readme-head {
@@ -277,7 +277,7 @@ h1 {
   overflow-x: auto;
   font-size: 0.8rem;
   line-height: 1.55;
-  max-height: 260px;
+  max-height: 220px;
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -311,7 +311,7 @@ h1 {
   padding: 12px;
   border-radius: 12px;
   overflow-x: auto;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .readme img {
@@ -328,14 +328,14 @@ code {
 @media (max-width: 720px) {
   .page {
     width: min(100% - 14px, 1240px);
-    padding: 12px 0 24px;
+    padding: 10px 0 22px;
   }
 
   .hero,
   .product-shell,
   .readme-block {
-    padding: 14px;
-    border-radius: 16px;
+    padding: 12px;
+    border-radius: 14px;
   }
 
   .store-header {
@@ -352,7 +352,7 @@ code {
   }
 
   .product-shell {
-    padding: 14px;
+    padding: 12px;
   }
 
   .scripts-grid {
