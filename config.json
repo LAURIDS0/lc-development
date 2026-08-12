@@ -1,12 +1,123 @@
 {
-  "owner": "LAURIDS0",
-  "repo": "lc_lifts",
-  "readmeBranch": "main",
-  "projects": [
+  "scripts": [
     {
-      "name": "lc_lifts",
-      "description": "Et liftscript til FiveM fom kan bruges i forbindelse med mekaniker.",
-      "url": "https://github.com/LAURIDS0/lc_lifts"
+      "fullLink": "https://github.com/LAURIDS0/lc_fishing",
+      "name": "LC Fishing",
+      "description": "A fishing script for FiveM that can be used together with mechanic gameplay.",
+      "readmeBranch": "main",
+      "tags": ["FiveM", "Free", "Fishing"],
+      "image": {
+        "src": "images/lc_fishing.png",
+        "name": "Free",
+        "alt": "lc_fishing preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
+      "fullLink": "https://github.com/LAURIDS0/lc_logs",
+      "name": "LC Logs",
+      "description": "A logging script for FiveM that can be used together with mechanic gameplay.",
+      "readmeBranch": "main",
+      "tags": ["FiveM", "Free", "Logging"],
+      "image": {
+        "src": "images/lc_logging.png",
+        "name": "Free",
+        "alt": "lc_logs preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
+      "fullLink": "",
+      "name": "LC Dispatch",
+      "description": "A dispatch script for FiveM that can be used together with mechanic gameplay.",
+      "readmeBranch": "main",
+      "tags": ["FiveM", "Free", "Dispatch"],
+      "image": {
+        "src": "images/lc_dispatch.png",
+        "name": "Free",
+        "alt": "lc_dispatch preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
+      "fullLink": "",
+      "name": "LC MDT",
+      "description": "A MDT script for FiveM that can be used together with mechanic gameplay.",
+      "readmeBranch": "main",
+      "tags": ["FiveM", "Free", "MDT"],
+      "image": {
+        "src": "images/lc_mdt.png",
+        "name": "Free",
+        "alt": "lc_mdt preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
+      "fullLink": "",
+      "name": "LC Phone",
+      "description": "A phone script for FiveM that can be used together with mechanic gameplay.",
+      "readmeBranch": "main",
+      "tags": ["FiveM", "Free", "Phone"],
+      "image": {
+        "src": "images/lc_phone.png",
+        "name": "Free",
+        "alt": "lc_phone preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
+      "fullLink": "",
+      "name": "LC Police",
+      "description": "A police script for FiveM that can be used together with mechanic gameplay.",
+      "readmeBranch": "main",
+      "tags": ["FiveM", "Free", "Police"],
+      "image": {
+        "src": "images/lc_police.png",
+        "name": "Free",
+        "alt": "lc_police preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
+      "fullLink": "https://github.com/LAURIDS0/lc_drone",
+      "name": "LC Drone",
+      "description": "A drone script for FiveM that can be used together with mechanic gameplay.",
+      "readmeBranch": "main",
+      "tags": ["FiveM", "Free", "Drone"],
+      "image": {
+        "src": "images/lc_drone.png",
+        "name": "Free",
+        "alt": "lc_drone preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
     }
   ]
 }

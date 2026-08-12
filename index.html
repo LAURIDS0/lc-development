@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="da">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="lc-development - FiveM scripts, udvikling og gratis GitHub-projekter." />
-  <title>lc-development</title>
+  <meta name="description" content="lc-development - free scripts and FiveM development." />
+  <title>LC Development</title>
+  <link rel="icon" type="image/png" href="images/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,52 +13,28 @@
 </head>
 <body>
   <main class="page">
-    <section class="hero">
-      <div class="eyebrow">lc-development.com</div>
-      <h1>FiveM scripts, udvikling og gratis projekter på GitHub.</h1>
-      <p class="lead">
-        Her finder du et overblik over det, jeg laver, samt en liste over mine gratis GitHub-projekter.
-        Siden kan også vise en README direkte fra GitHub via en simpel config-fil.
-      </p>
-      <div class="hero-actions">
-        <a class="button primary" href="#projects">Se gratis projekter</a>
-        <a class="button secondary" href="#readme">Se README</a>
+    <header class="store-header">
+      <div>
+        <div class="brand">LC Development</div>
+        <div class="store-subtitle">Free FiveM scripts, made by me over the years.</div>
       </div>
+      <div class="header-pill">My GitHub</div>
+    </header>
+
+    <section class="hero storefront-hero">
+      <div class="eyebrow">Featured free script</div>
+      <h1>A simple shop-style showcase for your free FiveM scripts.</h1>
     </section>
 
-    <section class="card">
-      <div class="section-heading">
-        <span>Om mig</span>
-        <h2>Hvad jeg laver</h2>
+    <section class="product-shell">
+      <div class="catalog-head">
+        <div class="section-heading">
+          <span>Free Scripts</span>
+          <h2>Featured releases</h2>
+        </div>
       </div>
-      <p>
-        Jeg bygger primært FiveM scripts, men arbejder også med hjemmesider, små værktøjer og
-        andre udviklingsopgaver. Målet med siden er at gøre det nemt at se, hvad jeg tilbyder,
-        og at samle mine åbne og gratis projekter ét sted.
-      </p>
-    </section>
 
-    <section class="card" id="projects">
-      <div class="section-heading">
-        <span>GitHub</span>
-        <h2>Gratis projekter</h2>
-      </div>
-      <p class="muted">
-        Tilføj dine gratis GitHub-projekter i <code>config.json</code>, så bliver de vist her med links.
-      </p>
-      <div id="projects-grid" class="projects-grid"></div>
-    </section>
-
-    <section class="card" id="readme">
-      <div class="section-heading">
-        <span>GitHub README</span>
-        <h2>Vis README fra et repository</h2>
-      </div>
-      <p class="muted">
-        Indsæt repo-linket i <code>config.json</code>, og siden henter README’en automatisk.
-      </p>
-      <div id="readme-status" class="status">Indlæser konfiguration…</div>
-      <article id="readme-content" class="readme"></article>
+      <div id="scripts-grid" class="scripts-grid"></div>
     </section>
   </main>
 
