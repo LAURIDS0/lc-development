@@ -1,0 +1,12 @@
+{
+  "owner": "dit-github-navn",
+  "repo": "dit-repo-navn",
+  "readmeBranch": "main",
+  "projects": [
+    {
+      "name": "Gratis FiveM script",
+      "description": "Et gratis script til dit FiveM setup.",
+      "url": "https://github.com/dit-github-navn/dit-repo-navn"
+    }
+  ]
+}
