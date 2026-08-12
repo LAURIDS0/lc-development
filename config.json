@@ -1,12 +1,12 @@
 {
-  "owner": "dit-github-navn",
-  "repo": "dit-repo-navn",
+  "owner": "LAURIDS0",
+  "repo": "lc_lifts",
   "readmeBranch": "main",
   "projects": [
     {
-      "name": "Gratis FiveM script",
-      "description": "Et gratis script til dit FiveM setup.",
-      "url": "https://github.com/dit-github-navn/dit-repo-navn"
+      "name": "lc_lifts",
+      "description": "Et liftscript til FiveM fom kan bruges i forbindelse med mekaniker.",
+      "url": "https://github.com/LAURIDS0/lc_lifts"
     }
   ]
 }
