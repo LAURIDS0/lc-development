@@ -33,6 +33,23 @@
         "objectFit": "contain",
         "objectPosition": "center"
       }
+    },
+    {
+      "fullLink": "https://github.com/LAURIDS0/lc_els",
+      "name": "LC Els",
+      "description": "A simple els script for FiveM.",
+      "readmeBranch": "main",
+      "tags": ["FiveM", "Free", "ELS"],
+      "image": {
+        "src": "images/lc_els.png",
+        "name": "Free",
+        "alt": "lc_els preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
     }
   ]
 }
