@@ -1,15 +1,15 @@
 {
   "scripts": [
     {
-      "fullLink": "https://github.com/LAURIDS0/lc_fishing",
-      "name": "LC Fishing",
-      "description": "A fishing script for FiveM that can be used together with mechanic gameplay.",
+      "fullLink": "https://github.com/LAURIDS0/lc_jobgarages",
+      "name": "LC Job Garages",
+      "description": "A simple job garages script for FiveM.",
       "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "Fishing"],
+      "tags": ["FiveM", "Free", "Job Garages"],
       "image": {
-        "src": "images/lc_fishing.png",
+        "src": "images/lc_jobgarages.png",
         "name": "Free",
-        "alt": "lc_fishing preview",
+        "alt": "lc_jobgarages preview",
         "position": "center",
         "width": 640,
         "height": 360,
@@ -18,100 +18,15 @@
       }
     },
     {
-      "fullLink": "https://github.com/LAURIDS0/lc_logs",
-      "name": "LC Logs",
-      "description": "A logging script for FiveM that can be used together with mechanic gameplay.",
+      "fullLink": "https://github.com/LAURIDS0/lc_garages",
+      "name": "LC Garages",
+      "description": "A simple garages script for FiveM.",
       "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "Logging"],
+      "tags": ["FiveM", "Free", "Garages"],
       "image": {
-        "src": "images/lc_logging.png",
+        "src": "images/lc_garages.png",
         "name": "Free",
-        "alt": "lc_logs preview",
-        "position": "center",
-        "width": 640,
-        "height": 360,
-        "objectFit": "contain",
-        "objectPosition": "center"
-      }
-    },
-    {
-      "fullLink": "",
-      "name": "LC Dispatch",
-      "description": "A dispatch script for FiveM that can be used together with mechanic gameplay.",
-      "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "Dispatch"],
-      "image": {
-        "src": "images/lc_dispatch.png",
-        "name": "Free",
-        "alt": "lc_dispatch preview",
-        "position": "center",
-        "width": 640,
-        "height": 360,
-        "objectFit": "contain",
-        "objectPosition": "center"
-      }
-    },
-    {
-      "fullLink": "",
-      "name": "LC MDT",
-      "description": "A MDT script for FiveM that can be used together with mechanic gameplay.",
-      "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "MDT"],
-      "image": {
-        "src": "images/lc_mdt.png",
-        "name": "Free",
-        "alt": "lc_mdt preview",
-        "position": "center",
-        "width": 640,
-        "height": 360,
-        "objectFit": "contain",
-        "objectPosition": "center"
-      }
-    },
-    {
-      "fullLink": "",
-      "name": "LC Phone",
-      "description": "A phone script for FiveM that can be used together with mechanic gameplay.",
-      "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "Phone"],
-      "image": {
-        "src": "images/lc_phone.png",
-        "name": "Free",
-        "alt": "lc_phone preview",
-        "position": "center",
-        "width": 640,
-        "height": 360,
-        "objectFit": "contain",
-        "objectPosition": "center"
-      }
-    },
-    {
-      "fullLink": "",
-      "name": "LC Police",
-      "description": "A police script for FiveM that can be used together with mechanic gameplay.",
-      "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "Police"],
-      "image": {
-        "src": "images/lc_police.png",
-        "name": "Free",
-        "alt": "lc_police preview",
-        "position": "center",
-        "width": 640,
-        "height": 360,
-        "objectFit": "contain",
-        "objectPosition": "center"
-      }
-    },
-    {
-      "fullLink": "https://github.com/LAURIDS0/lc_drone",
-      "name": "LC Drone",
-      "description": "A drone script for FiveM that can be used together with mechanic gameplay.",
-      "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "Drone"],
-      "image": {
-        "src": "images/lc_drone.png",
-        "name": "Free",
-        "alt": "lc_drone preview",
+        "alt": "lc_garages preview",
         "position": "center",
         "width": 640,
         "height": 360,
