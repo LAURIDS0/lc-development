@@ -20,8 +20,8 @@ Hvis du vil pege direkte på en README uden at bruge `owner` og `repo`, kan du s
 ## Filstruktur
 
 - `index.html` — selve siden
-- `styles.css` — design og layout
-- `script.js` — henter config og renderer README/projekter
+- `styles.css` — det, kun forsiden bruger. Resten af designet (farver, header, knapper, tema) kommer fra `docs/docs.css`, så forsiden og docs altid ser ens ud
+- `script.js` — henter `config.json`, viser scripts som kort og åbner README'en fra GitHub i et vindue
 - `config.json` — din redigerbare konfiguration
 
 ## Docs (lc-development.com/docs)

@@ -1,120 +1,108 @@
-const fallbackConfig = { scripts: [] };
+// =====================================================================
+//  lc-development.com front page
+//  Shows the scripts from config.json as cards. A card's README is
+//  fetched from GitHub when it is opened.
+//
+//  A script in config.json:
+//    fullLink      the GitHub repository
+//    name, description, tags
+//    readmeBranch  the branch with the README (default main)
+//    docs          optional link to its documentation, e.g. "docs/#/lc_hack"
+//    image         { src, alt, objectFit, objectPosition }
+// =====================================================================
 
-async function loadConfig() {
-  const res = await fetch("config.json", { cache: "no-store" });
-  if (!res.ok) return fallbackConfig;
-  return { ...fallbackConfig, ...(await res.json()) };
-}
-
-function parseGitHubRepo(fullLink) {
-  if (!fullLink) return null;
-  const match = fullLink.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\/)?$/i);
-  if (!match) return null;
-  return { owner: match[1], repo: match[2] };
-}
-
-function readmeRawUrl(fullLink, branch = "main") {
-  const parsed = parseGitHubRepo(fullLink);
-  if (!parsed) return "";
-  return `https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/${branch || "main"}/README.md`;
-}
+const $ = (s, r = document) => r.querySelector(s);
 
 function escapeHtml(value) {
-  return String(value || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    return String(value ?? '')
+        .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
+// https://github.com/owner/repo -> the raw README on that branch
+function readmeUrl(script) {
+    const match = (script.fullLink || '').match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+?)\/?$/i);
+    return match ? `https://raw.githubusercontent.com/${match[1]}/${match[2]}/${script.readmeBranch || 'main'}/README.md` : '';
+}
+
+// ---------- Theme: shared with the docs ----------
+function setTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    $('#theme i').className = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+    try { localStorage.setItem('lc_docs_theme', theme); } catch { /* not kept */ }
+}
+setTheme(document.documentElement.dataset.theme || 'dark');
+$('#theme').onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+
+// ---------- Cards ----------
 function renderImage(image = {}) {
-  const src = image.src ? escapeHtml(image.src) : "";
-  const alt = escapeHtml(image.alt || "Script image");
-  const objectFit = image.objectFit ? `object-fit: ${escapeHtml(image.objectFit)};` : "object-fit: contain;";
-  const objectPosition = image.objectPosition ? `object-position: ${escapeHtml(image.objectPosition)};` : "object-position: center;";
-
-  if (!src) {
-    return `<div class="image-placeholder">No image</div>`;
-  }
-
-  return `
-    <div class="script-image-wrap">
-      <img class="script-image" src="${src}" alt="${alt}" style="${objectFit}${objectPosition}" />
-    </div>
-  `;
+    if (!image.src) return '<div class="script-image empty"><i class="fa-solid fa-cube"></i></div>';
+    const style = `object-fit: ${escapeHtml(image.objectFit || 'cover')}; object-position: ${escapeHtml(image.objectPosition || 'center')};`;
+    return `<img class="script-image" src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt || '')}" style="${style}" loading="lazy">`;
 }
 
-function renderScriptCards(scripts) {
-  const host = document.getElementById("scripts-grid");
-
-  if (!scripts?.length) {
-    host.innerHTML = `<div class="empty-state">Add your scripts in <code>config.json</code> to show them here.</div>`;
-    return;
-  }
-
-  host.innerHTML = scripts.map((script, index) => {
-    const repoUrl = script.fullLink || "#";
-    return `
-      <article class="script-card">
-        <div class="script-card-top">
-          ${renderImage(script.image)}
-        </div>
-        <div class="script-card-body">
-          <div class="section-heading">
-            <h2>${escapeHtml(script.name || "Uden navn")}</h2>
-          </div>
-          <p class="script-description">${escapeHtml(script.description || "No description yet.")}</p>
-          <div class="product-tags">
-            ${(script.tags || []).map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
-          </div>
-          <div class="script-meta">
-            <a class="button primary" href="${repoUrl}" target="_blank" rel="noreferrer">View repository</a>
-            ${script.docs ? `<a class="button" href="${escapeHtml(script.docs)}">Documentation</a>` : ""}
-          </div>
-          <div class="readme-block readme-inline">
-            <div class="readme-status" data-status>Loading README…</div>
-            <article class="readme" data-readme></article>
-          </div>
-        </div>
-      </article>
-    `;
-  }).join("");
-
-  scripts.forEach((script, index) => renderReadmeIntoCard(script, index));
+function renderScripts(scripts) {
+    const grid = $('#scripts-grid');
+    $('#count').textContent = scripts.length ? `${scripts.length} free` : '';
+    if (!scripts.length) {
+        grid.innerHTML = '<div class="empty-state">Add your scripts in <code>config.json</code> to show them here.</div>';
+        return;
+    }
+    grid.innerHTML = scripts.map((script, i) => `
+        <article class="script-card">
+            ${renderImage(script.image)}
+            <div class="script-body">
+                <div class="script-title">${escapeHtml(script.name || 'Untitled')}</div>
+                <p>${escapeHtml(script.description || 'No description yet.')}</p>
+                <div class="tags">${(script.tags || []).map(tag => `<span class="badge">${escapeHtml(tag)}</span>`).join('')}</div>
+                <div class="actions">
+                    ${script.docs ? `<a class="button primary" href="${escapeHtml(script.docs)}"><i class="fa-solid fa-book"></i>Docs</a>` : ''}
+                    <button class="button" type="button" data-readme="${i}"><i class="fa-regular fa-file-lines"></i>README</button>
+                    <a class="button" href="${escapeHtml(script.fullLink || '#')}" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Repository</a>
+                </div>
+            </div>
+        </article>`).join('');
+    grid.querySelectorAll('[data-readme]').forEach(button => {
+        button.onclick = () => openReadme(scripts[Number(button.dataset.readme)]);
+    });
 }
 
-async function renderReadmeIntoCard(script, index) {
-  const card = document.querySelectorAll(".script-card")[index];
-  if (!card) return;
+// ---------- README dialog ----------
+const overlay = $('#readme');
+const body = $('#readme-body');
+let opened = null;
 
-  const status = card.querySelector("[data-status]");
-  const content = card.querySelector("[data-readme]");
-  const url = readmeRawUrl(script.fullLink, script.readmeBranch);
+async function openReadme(script) {
+    opened = script;
+    $('#readme-title').textContent = script.name || 'README';
+    $('#readme-repo').href = script.fullLink || '#';
+    body.innerHTML = '<div class="readme-status">Fetching the README from GitHub...</div>';
+    overlay.classList.add('open');
+    body.scrollTop = 0;
 
-  if (!url) {
-    status.textContent = "Add a GitHub link in config.json.";
-    content.innerHTML = "";
-    return;
-  }
-
-  try {
-    status.textContent = "Fetching README from GitHub…";
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const markdown = await res.text();
-    content.innerHTML = window.marked ? marked.parse(markdown) : `<pre>${escapeHtml(markdown)}</pre>`;
-    status.textContent = " ";
-  } catch (error) {
-    status.textContent = "Could not fetch the README. Check that the repo is public and the link is correct.";
-    content.innerHTML = `<p class="muted">Technical error: ${escapeHtml(error.message)}</p>`;
-  }
+    const url = readmeUrl(script);
+    try {
+        if (!url) throw new Error('no GitHub link in config.json');
+        const res = await fetch(url, { cache: 'no-cache' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const markdown = await res.text();
+        if (opened !== script) return; // Another README was opened meanwhile
+        body.innerHTML = window.marked ? marked.parse(markdown) : `<pre>${escapeHtml(markdown)}</pre>`;
+    } catch (error) {
+        if (opened === script) body.innerHTML = `<div class="readme-status">Could not fetch the README (${escapeHtml(error.message)}). Open the repository instead.</div>`;
+    }
 }
 
-async function init() {
-  const config = await loadConfig();
-  renderScriptCards(config.scripts);
+function closeReadme() {
+    overlay.classList.remove('open');
+    opened = null;
 }
+$('#readme-close').onclick = closeReadme;
+overlay.addEventListener('click', (e) => { if (e.target === overlay) closeReadme(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeReadme(); });
 
-init();
+// ---------- Start ----------
+fetch('config.json', { cache: 'no-cache' })
+    .then(res => (res.ok ? res.json() : { scripts: [] }))
+    .catch(() => ({ scripts: [] }))
+    .then(config => renderScripts(config.scripts || []));
