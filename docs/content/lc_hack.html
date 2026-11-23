@@ -314,7 +314,8 @@ end)</pre>
 <p><code>firewall = {}</code> blocks everything from the outside. See <a href="#/guides/networking/firewall">Networking</a> for how traffic is checked.</p>
 
 <h2>Files</h2>
-<p>Every machine gets around 90 default Linux files, built with its own <code>user</code>, <code>host</code> and IPs. Your <code>files</code> are added on top.</p>
+<p>Every machine gets a full Linux filesystem of around 400 files and folders, built with its own <code>user</code>, <code>host</code>, IPs and OS: <code>/etc</code> with services (nginx, mysql, redis, systemd), logs in <code>/var/log</code>, a home with documents, projects, <code>.git</code>, browser data and scripts, <code>/proc</code>, <code>/sys</code> and the usual programs. Small things like documents and logs vary from machine to machine. Your <code>files</code> are added on top.</p>
+<p>The OS follows the machine's <code>desktop</code>: <code>/etc/os-release</code>, the kernel, <code>uname -a</code> and the <code>ssh</code> banner say Kali, Fedora, Linux Mint, Debian (ChromeOS), macOS (Darwin) or Ubuntu. Machines without a desktop are Ubuntu servers.</p>
 <ul>
     <li><code>~</code> is the machine's home directory. Absolute paths work too.</li>
     <li>Directories are created automatically.</li>
@@ -324,7 +325,7 @@ end)</pre>
     <li>Files in <code>/var/www/html</code> are the machine's website when it has port <code>80</code>: <code>curl</code> and the browser app show them. See <a href="#/guides/website">Creating a Website</a>.</li>
     <li>Image files (<code>.png</code>, <code>.jpg</code>, <code>.svg</code>, ...) are shown in the image viewer, see <a href="#/guides/desktops/images">Images</a>.</li>
 </ul>
-<p>By default only root can read <code>/root</code>, <code>/etc/shadow</code>, <code>/etc/sudoers</code>, <code>/var/backups/shadow.bak</code> and <code>~/.ssh/id_rsa</code>.</p>
+<p>By default only root can read <code>/root</code>, <code>/etc/shadow</code>, <code>/etc/gshadow</code>, <code>/etc/sudoers</code>, <code>/etc/sudoers.d</code>, <code>/etc/ssh/ssh_host_ed25519_key</code>, <code>/etc/mysql/debian.cnf</code>, <code>/var/lib/mysql</code>, <code>/var/spool/cron/crontabs</code>, <code>/var/log/auth.log</code>, <code>/var/backups/shadow.bak</code> and <code>~/.ssh/id_rsa</code>. A folder with a locked file in it can't be moved or copied without root.</p>
 <p>The default files contain fake passwords to mislead players. <strong>Do not</strong> use these as real passwords:</p>
 <div class="table"><table>
 <thead><tr><th>Fake password</th><th>Found in</th></tr></thead>
@@ -333,6 +334,13 @@ end)</pre>
 <tr><td><code>Pa$$w0rd!</code></td><td><code>/var/www/html/config.php</code></td></tr>
 <tr><td><code>changeme</code></td><td><code>/opt/backup.sh</code></td></tr>
 <tr><td><code>summer2019</code>, <code>Football123</code>, <code>12345678</code></td><td><code>~/Documents/old_passwords.txt</code></td></tr>
+<tr><td><code>devpass123</code></td><td><code>~/projects/webapp/.env</code></td></tr>
+<tr><td><code>ghp_old7Tq2Lw9x</code></td><td><code>~/.git-credentials</code></td></tr>
+<tr><td><code>Welcome2026</code></td><td><code>~/Documents/notes.txt</code> (on some machines)</td></tr>
+<tr><td><code>R3d1s_cache!</code></td><td><code>/etc/redis/redis.conf</code></td></tr>
+<tr><td><code>sYs8mAint2024</code></td><td><code>/etc/mysql/debian.cnf</code> (root only)</td></tr>
+<tr><td><code>Sh4re-2023</code></td><td><code>/root/.smbcredentials</code> (root only)</td></tr>
+<tr><td><code>tok_live_7d1f0c2e9a</code>, <code>4f1c9e2a...</code></td><td><code>/etc/systemd/system/webapp.service</code>, <code>/opt/monitoring/agent.yml</code></td></tr>
 </tbody></table></div>
 
 <p><strong>Example</strong></p>
@@ -1267,14 +1275,19 @@ end)</pre>
 <tr><td><code>ls [-a] [-l] [path]</code></td><td>List files. <code>-a</code> shows hidden files, <code>-l</code> shows permissions, owner and size.</td></tr>
 <tr><td><code>la</code>, <code>ll</code></td><td>Shortcuts for <code>ls -a</code> and <code>ls -la</code>.</td></tr>
 <tr><td><code>cd [path]</code>, <code>pwd</code></td><td>Change or print the current directory. Supports <code>..</code>, <code>/</code> and <code>~</code>.</td></tr>
-<tr><td><code>cat &lt;file...&gt;</code></td><td>Print one or more files.</td></tr>
-<tr><td><code>head &lt;file&gt;</code>, <code>tail &lt;file&gt;</code></td><td>First or last 10 lines.</td></tr>
+<tr><td><code>cat &lt;file...&gt;</code>, <code>less</code>, <code>more</code></td><td>Print one or more files.</td></tr>
+<tr><td><code>head [-n N] &lt;file&gt;</code>, <code>tail [-n N] &lt;file&gt;</code></td><td>First or last lines, 10 by default. <code>-5</code> works too.</td></tr>
+<tr><td><code>tree [-a] [-L depth] [path]</code></td><td>A folder as a tree, with the number of folders and files.</td></tr>
+<tr><td><code>stat &lt;file&gt;</code></td><td>Size, type, permissions and owner.</td></tr>
+<tr><td><code>sort [-r] [-u] [-n] &lt;file&gt;</code>, <code>uniq [-c] &lt;file&gt;</code></td><td>Sort lines (reverse, unique, numeric), or remove repeated lines and count them.</td></tr>
 <tr><td><code>echo &lt;text&gt; &gt; &lt;file&gt;</code>, <code>echo &lt;text&gt; &gt;&gt; &lt;file&gt;</code></td><td>Write text to a file, or add it as a new line. Users can write in their home directory and <code>/tmp</code>, root everywhere.</td></tr>
 <tr><td><code>touch &lt;file&gt;</code></td><td>Create an empty file.</td></tr>
 <tr><td><code>mkdir [-p] &lt;dir&gt;</code></td><td>Create a folder. <code>-p</code> creates the folders on the way too.</td></tr>
 <tr><td><code>rm [-r] &lt;file&gt;</code></td><td>Delete a file, or a folder with <code>-r</code>.</td></tr>
 <tr><td><code>mv &lt;from&gt; &lt;to&gt;</code></td><td>Move or rename a file or folder.</td></tr>
-<tr><td><code>grep &lt;text&gt; &lt;file&gt;</code></td><td>Lines containing the text.</td></tr>
+<tr><td><code>cp [-r] &lt;from&gt; &lt;to&gt;</code></td><td>Copy a file, or a folder with <code>-r</code>.</td></tr>
+<tr><td><code>rmdir &lt;dir&gt;</code></td><td>Delete an empty folder.</td></tr>
+<tr><td><code>grep [-i] [-n] [-v] [-c] [-r] &lt;text&gt; &lt;file | dir&gt;</code></td><td>Lines containing the text. <code>-i</code> ignores case, <code>-n</code> shows line numbers, <code>-v</code> inverts, <code>-c</code> counts, <code>-r</code> searches every file in a folder.</td></tr>
 <tr><td><code>find [path] [-name pattern]</code></td><td>Find files. <code>*</code> is a wildcard, e.g. <code>find / -name *.sh</code>.</td></tr>
 <tr><td><code>file &lt;file&gt;</code></td><td>File type: ASCII text, shell script, ELF, image, directory.</td></tr>
 <tr><td><code>wc &lt;file&gt;</code></td><td>Lines, words and characters.</td></tr>
@@ -1290,6 +1303,7 @@ end)</pre>
 <tr><td><code>hostname [-I]</code></td><td>The machine's name, or its IPs with <code>-I</code>.</td></tr>
 <tr><td><code>uname [-a]</code>, <code>date</code></td><td>System information.</td></tr>
 <tr><td><code>ps aux</code></td><td>Running processes, including the machine's <code>processes</code>.</td></tr>
+<tr><td><code>du [-s] [-h] [path]</code>, <code>df [-h]</code></td><td>Disk usage of a folder, and free disk space.</td></tr>
 <tr><td><code>crontab -l</code></td><td>The user's crontab (<code>/var/spool/cron/crontabs/&lt;user&gt;</code>), or <code>/etc/crontab</code> as root.</td></tr>
 <tr><td><code>history</code>, <code>echo</code>, <code>clear</code>, <code>help</code></td><td>Command history, print text, clear the screen, list commands.</td></tr>
 </tbody></table></div>
