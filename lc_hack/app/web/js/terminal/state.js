@@ -22,6 +22,7 @@ let history = [];      // Every command typed (for arrow keys and "history")
 let historyIndex = 0;  // Position in history while pressing up/down
 let serverCommands = []; // Commands from config.commands: they run on the server
 let dns = {};          // name -> IP for the always-on servers (config.lua on the server)
+let searchUrl = null;  // The search engine's results page (config.lua), e.g. 'eyefind.info/search.html'
 let pending = null;    // When set, the terminal is waiting for a password: { label, onValue }
 
 // Known ports and their service names (used by nmap)

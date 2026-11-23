@@ -232,8 +232,9 @@ function route() {
     }
     $('#sidebar').classList.remove('open');
     if (anchor) {
-        const el = document.getElementById(anchor);
-        if (el && !el.closest('article').hidden) el.scrollIntoView();
+        // Look in the page itself: two pages can have a heading with the same id
+        const el = page.article.querySelector(`[id="${CSS.escape(anchor)}"]`);
+        if (el) el.scrollIntoView();
     }
 }
 window.addEventListener('hashchange', route);

@@ -3,7 +3,7 @@
     {
       "fullLink": "https://github.com/LAURIDS0/lc_hack",
       "name": "LC Hack",
-      "description": "A hacking minigame with a fake Linux terminal, desktops, networks and websites.",
+      "description": "A hacking minigame with a fake Linux terminal, desktops, networks, websites and a search engine.",
       "readmeBranch": "main",
       "docs": "docs/#/lc_hack",
       "tags": [

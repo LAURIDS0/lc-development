@@ -106,7 +106,7 @@ exports.lc_hack:registerDevice('atm', { scan = scan, connect = connect })</pre>
     <li><a href="#/guides/hack">Creating a Hack</a>: build your first hack step by step and test it in the browser.</li>
     <li><a href="#/hackconfig">HackConfig</a>: every field a hack can have.</li>
     <li><a href="#/functions/server">Server functions</a>: terminals, hacks and minigames.</li>
-    <li><a href="#/config">Config</a>: servers that are always on, DNS and websites.</li>
+    <li><a href="#/config">Config</a>: servers that are always on, DNS, websites and the search engine.</li>
     <li><a href="#/guides/hacktype">Creating a Hack Type</a>: your own devices on the player's laptop, in a separate resource, like <a href="#~/lc_phonehack">LC Phonehack</a> and <a href="#~/lc_keyclone">LC Keyclone</a>.</li>
 </ul>
 
@@ -205,6 +205,13 @@ end)</pre>
 <h2>Websites players built are gone</h2>
 <p>They are saved in <code>serverdata.json</code> in the resource folder, which is deleted when the folder is replaced on an update. See <a href="#/config/saved-changes">Saved changes</a>.</p>
 
+<h2>Search doesn't find a page</h2>
+<ul>
+    <li>Only websites with a name in <a href="#/config/dns"><code>dns</code></a> are searched, and only the pages <code>index.html</code> links to are loaded.</li>
+    <li>Every word must be on the page. Try fewer words.</li>
+    <li>The search engine doesn't list its own website.</li>
+</ul>
+
 <h2>The browser test mode shows nothing</h2>
 <ul>
     <li>Run the web server in the lc_hack folder (or your resources folder) and open <code>/web/</code>, not the <code>web</code> folder itself: the test mode reads <code>config.lua</code> and <code>server/commands.lua</code>.</li>
@@ -247,6 +254,9 @@ end)</pre>
         ['northbank.com'] = '82.103.40.12',
         ['www.northbank.com'] = '82.103.40.12',
     },
+
+    -- The search engine's results page: the browser starts on its front page
+    search = 'eyefind.info/search.html',
 }</pre>
 
 <h2>laptop</h2>
@@ -281,6 +291,7 @@ end)</pre>
     <li>A server with a <code>website</code> and no <code>ports</code> gets <code>{ 22, 80, 443 }</code>. Without a firewall, every port is open to everyone.</li>
     <li>A server can be the <code>target</code> of a hack.</li>
 </ul>
+<p>lc_hack comes with Eyefind and 20 brand websites, see <a href="#/guides/website/included-websites">Included websites</a>. Remove a server and its <code>dns</code> names to take a website out.</p>
 
 <h2>dns</h2>
 <p>Names and the IP they point to. Used by the browser, <code>curl</code>, <code>ping</code>, <code>ssh</code> and every other command on every machine.</p>
@@ -289,6 +300,14 @@ end)</pre>
         <ul><li><code>[name] = ip</code>. Names are not case sensitive.</li></ul></li>
 </ul>
 <p>A machine's own <code>/etc/hosts</code> is checked first, like on Linux. Add <code>www.</code> names separately if you want them to work.</p>
+
+<h2>search</h2>
+<p>The search engine's results page. The browser starts on the search engine's front page, and searches with it when the player types something in the address bar that isn't an address.</p>
+<ul>
+    <li>search?: <code>string</code> or <code>false</code>
+        <ul><li>The address of the results page, without <code>http://</code>, e.g. <code>'eyefind.info/search.html'</code> (the included config). Leave it out or set <code>false</code> for no search engine: the browser then starts on an empty tab.</li></ul></li>
+</ul>
+<p>The results page is an ordinary page with an element marked <code>data-search</code>, see <a href="#/guides/website/search">Search</a>.</p>
 
 <h2>Saved changes</h2>
 <p>What players change on the servers is saved in <code>serverdata.json</code> in the resource folder, kept apart from <code>config.lua</code> and <code>websites/</code>.</p>
@@ -971,7 +990,66 @@ exports.lc_hack:createTerminal({
 </div>
 
 <h2>Static only</h2>
-<p>Websites are static: HTML, CSS and images. Scripts and forms never run, and a page can never load anything from outside, not even fonts or images from another site. That keeps players safe from pages other players made.</p>
+<p>Websites are static: HTML, CSS and images. Scripts never run, and a page can never load anything from outside, not even fonts or images from another site. That keeps players safe from pages other players made.</p>
+<p>Forms work: the browser sends them itself, as a GET with the fields in the query string (<code>search.html?q=burger</code>). Enter in a field and submit buttons send the form.</p>
+
+<h2>Search</h2>
+<p>A page can't run scripts, so the browser does the searching. A page with an element marked <code>data-search</code> gets the results for <code>?q=</code> put in it before it is shown: every page on every website in <a href="#/config/dns">dns</a>, including what players built in game. <a href="#/config/search">search</a> in <code>config.lua</code> points the browser to the results page.</p>
+<img class="shot" src="images/lc_hack/search.png" alt="Eyefind showing the results for burger" loading="lazy">
+<pre data-lang="html">&lt;form action="search.html"&gt;
+    &lt;input name="q"&gt;
+    &lt;button type="submit"&gt;Search&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;p&gt;&lt;span data-search-count&gt;&lt;/span&gt; for &lt;b data-search-query&gt;&lt;/b&gt;&lt;/p&gt;
+&lt;div data-search&gt;&lt;/div&gt;</pre>
+<div class="table"><table>
+<thead><tr><th>On the page</th><th>Filled in with</th></tr></thead>
+<tbody>
+<tr><td><code>data-search</code></td><td>One <code>div.result</code> per page found, best first: <code>cite</code> (the address), <code>a &gt; h3</code> (the title, linking to the page) and <code>p</code> (the description, or the text around the first word). A <code>p.no-results</code> when nothing matches.</td></tr>
+<tr><td><code>data-search-query</code></td><td>The words searched for.</td></tr>
+<tr><td><code>data-search-count</code></td><td>The number of results, e.g. <code>12 results</code>.</td></tr>
+<tr><td><code>input[name="q"]</code></td><td>Keeps the words, so the player can change them.</td></tr>
+</tbody></table></div>
+<ul>
+    <li>Every word must be on the page. A word in the <code>&lt;title&gt;</code> counts most, then the address, the <code>&lt;meta name="description"&gt;</code> and the text.</li>
+    <li>Give every page a good <code>&lt;title&gt;</code>, and the front page a description: it is shown under the title.</li>
+    <li>The search engine doesn't list its own website, and a website with several names is shown with its shortest one.</li>
+    <li>Style the results in the page's own stylesheet, like <code>websites/eyefind/style.css</code>.</li>
+</ul>
+
+<h2>Included websites</h2>
+<p>lc_hack comes with Eyefind and 20 websites for well-known Los Santos brands, in <code>websites/</code>. Each is a server in <code>config.lua</code> with its own IP, user and password, and its names in <code>dns</code> (also with <code>www.</code>).</p>
+<div class="table"><table>
+<thead><tr><th>Website</th><th>Brand</th><th>Category</th></tr></thead>
+<tbody>
+<tr><td><code>eyefind.info</code></td><td>Eyefind</td><td>Search engine</td></tr>
+<tr><td><code>mazebank.com</code></td><td>Maze Bank</td><td>Bank</td></tr>
+<tr><td><code>fleeca.com</code></td><td>Fleeca</td><td>Bank</td></tr>
+<tr><td><code>burgershot.com</code></td><td>Burger Shot</td><td>Fast food</td></tr>
+<tr><td><code>cluckinbell.com</code></td><td>Cluckin' Bell</td><td>Fast food</td></tr>
+<tr><td><code>beanmachine.com</code></td><td>Bean Machine</td><td>Coffee</td></tr>
+<tr><td><code>lifeinvader.com</code></td><td>Lifeinvader</td><td>Social network</td></tr>
+<tr><td><code>weazelnews.com</code></td><td>Weazel News</td><td>News</td></tr>
+<tr><td><code>pdm.com</code></td><td>Premium Deluxe Motorsport</td><td>Car dealer</td></tr>
+<tr><td><code>lscustoms.com</code></td><td>Los Santos Customs</td><td>Tuning</td></tr>
+<tr><td><code>lspd.gov</code></td><td>Los Santos Police Department</td><td>Police</td></tr>
+<tr><td><code>pillboxmedical.com</code></td><td>Pillbox Hill Medical Center</td><td>Hospital</td></tr>
+<tr><td><code>ammu-nation.com</code></td><td>Ammu-Nation</td><td>Gun store</td></tr>
+<tr><td><code>247store.com</code></td><td>24/7 Supermarket</td><td>Convenience store</td></tr>
+<tr><td><code>vangelico.com</code></td><td>Vangelico</td><td>Jewelry</td></tr>
+<tr><td><code>ponsonbys.com</code></td><td>Ponsonbys</td><td>Fashion</td></tr>
+<tr><td><code>dynasty8.com</code></td><td>Dynasty 8</td><td>Real estate</td></tr>
+<tr><td><code>downtowncab.co</code></td><td>Downtown Cab Co.</td><td>Taxi</td></tr>
+<tr><td><code>thediamondcasino.com</code></td><td>The Diamond Casino &amp; Resort</td><td>Casino and hotel</td></tr>
+<tr><td><code>gruppesechs.com</code></td><td>Gruppe Sechs</td><td>Security</td></tr>
+<tr><td><code>bahamamamas.com</code></td><td>Bahama Mamas West</td><td>Nightclub</td></tr>
+</tbody></table></div>
+<ul>
+    <li>The passwords aren't hinted anywhere. Give them to a business in your city, so it can update its own website in game.</li>
+    <li>A few have an HTML comment with a small hint for curious players.</li>
+    <li>Change them as you like, or remove a server and its <code>dns</code> names to take a website out.</li>
+</ul>
 
 <h2>Building in game</h2>
 <p>Players change a website by logging in to the server and editing the files in <code>/var/www/html</code>, with the text editor, <code>echo &gt;</code>, <code>touch</code>, <code>mkdir</code>, <code>rm</code> and <code>mv</code>.</p>
@@ -1336,7 +1414,7 @@ end)</pre>
     <li><strong>Files</strong> - browse the desktop machine's files, with Home, Desktop, Documents, Downloads, Pictures and <code>/</code> in the sidebar. Double click opens a folder, an image in the image viewer and anything else in the editor. Drag files onto a folder, another window or the desktop to move them. Locked files show a lock and an error dialog.</li>
     <li><strong>Text Editor</strong> - opens, edits and saves files. Save with the button or <code>Ctrl+S</code>. The path field decides where the file is saved; relative paths start in the home directory, and new files go to the desktop. Users can save in their home directory and <code>/tmp</code>, root everywhere.</li>
     <li><strong>Image viewer</strong> - shows the images in a folder with previous / next. Opened from the dock, it starts in <code>~/Pictures</code>.</li>
-    <li><strong>Browser</strong> - works like <code>curl</code> from the desktop's machine: same <code>/etc/hosts</code>, network and firewall. <code>http://10.0.0.30/</code> shows <code>/var/www/html/index.html</code> on that machine, <code>http://web01/notes.txt</code> shows <code>/var/www/html/notes.txt</code>. Pages are sandboxed, scripts never run.</li>
+    <li><strong>Browser</strong> - works like <code>curl</code> from the desktop's machine: same <code>/etc/hosts</code>, network and firewall. <code>http://10.0.0.30/</code> shows <code>/var/www/html/index.html</code> on that machine, <code>http://web01/notes.txt</code> shows <code>/var/www/html/notes.txt</code>. Pages are sandboxed, scripts never run; forms are sent by the browser. It starts on the <a href="#/config/search">search engine</a>, and text in the address bar that isn't an address is searched for.</li>
     <li><strong>System monitor</strong> - the same processes as <code>ps aux</code>.</li>
     <li><strong>Cameras</strong> - every camera opened with <code>view</code> gets its own window, and several can be open at once. The one clicked last is live; the others freeze on their last picture with a timestamp (needs <a href="https://github.com/citizenfx/screenshot-basic" target="_blank" rel="noopener">screenshot-basic</a>). The game camera is turned and widened so the camera's view fits the window.</li>
 </ul>
@@ -1577,6 +1655,7 @@ function openCalculator() {
 <tr><td><code>reach(ip, port)</code></td><td>terminal/network.js</td><td><code>{ status, machine, src }</code>, <code>port</code> is a number or <code>'icmp'</code>.</td></tr>
 <tr><td><code>findMachine(ip)</code></td><td>terminal/network.js</td><td>The machine with that IP.</td></tr>
 <tr><td><code>pageFile(machine, path)</code></td><td>terminal/network.js</td><td>A file from the machine's web root, as the browser and <code>curl</code> see it.</td></tr>
+<tr><td><code>searchWeb(query)</code></td><td>desktop/apps/browser.js</td><td>Searches every page on every website in the DNS, best first: <code>{ title, url, snippet }[]</code>.</td></tr>
 <tr><td><code>askPassword(label, prompt, onValue)</code></td><td>terminal/auth.js</td><td>Asks for a password.</td></tr>
 <tr><td><code>verify(machine, kind, user, value, ok, failText)</code></td><td>terminal/auth.js</td><td>Sends a password attempt to the server.</td></tr>
 <tr><td><code>openDesktop(session, remote)</code>, <code>closeDesktop()</code></td><td>desktop/desktop.js</td><td>Opens or closes the desktop.</td></tr>

@@ -7,6 +7,7 @@ function open(cfg = {}) {
     closeDesktop(); // In case a desktop was left open last time
     currentTerminal = cfg.terminal ?? null;
     dns = cfg.dns || {};
+    searchUrl = cfg.search || null;
     serverCommands = toList(cfg.serverCommands);
     finished = false;
     pending = null;

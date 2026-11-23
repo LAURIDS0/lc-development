@@ -150,7 +150,7 @@ if (typeof GetParentResourceName !== 'function' && !MIRROR) {
         }));
         const dns = {};
         for (const [name, ip] of Object.entries(config.dns || {})) dns[name.toLowerCase()] = ip;
-        return { servers, dns };
+        return { servers, dns, search: config.search };
     };
 
     // Like servers.apply, without the checks (this is only for testing)
@@ -182,6 +182,7 @@ if (typeof GetParentResourceName !== 'function' && !MIRROR) {
         const pub = publicMachine(example, 1);
         pub.network = machines.slice(1).map((m, i) => publicMachine(m, i + 2));
         pub.dns = config.dns;
+        pub.search = config.search;
         s = { machines, target, attempts: example.attempts || 3 };
         window.postMessage({ action: 'open', config: pub }, '*');
     };

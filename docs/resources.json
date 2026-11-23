@@ -3,7 +3,7 @@
         "id": "lc_hack",
         "name": "LC Hack",
         "icon": "fa-solid fa-terminal",
-        "description": "A hacking minigame with a fake Linux terminal, six desktops, networks, firewalls and websites. The core the other hacks build on, with the player's own laptop.",
+        "description": "A hacking minigame with a fake Linux terminal, six desktops, networks, firewalls, 20 brand websites and a search engine. The core the other hacks build on, with the player's own laptop.",
         "github": "https://github.com/LAURIDS0/lc_hack",
         "image": "images/lc_hack/desktop-macos.png",
         "status": "released",

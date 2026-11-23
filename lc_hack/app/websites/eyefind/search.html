@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eyefind Search</title>
+    <meta name="description" content="Eyefind search results.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="top">
+        <a href="index.html"><img src="img/logo.svg" alt="Eyefind" class="logo-small"></a>
+        <form action="search.html" class="searchbox">
+            <input name="q" placeholder="Search Los Santos" autocomplete="off">
+            <button type="submit">Search</button>
+        </form>
+    </header>
+    <main class="serp">
+        <!-- Filled in by the browser: data-search-count, data-search-query and data-search -->
+        <p class="count"><span data-search-count></span> for <b data-search-query></b></p>
+        <div class="results" data-search></div>
+    </main>
+</body>
+</html>
