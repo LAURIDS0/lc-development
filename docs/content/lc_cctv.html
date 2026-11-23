@@ -4,14 +4,10 @@
     <a data-page="issues">Common Issues</a>
     <a data-page="config">Config</a>
     <a data-page="site">Site</a>
-    <div data-folder="Functions">
-        <a data-page="functions/server">Server</a>
-        <a data-page="functions/client">Client</a>
-    </div>
-    <a data-page="events">Events</a>
     <div data-folder="Guides">
-        <a data-page="guides/dispatch">Using it in Other Scripts</a>
+        <a data-page="guides/cameras">Placing Cameras</a>
         <a data-page="guides/playing">Playing</a>
+        <a data-page="guides/how-it-works">How it Works</a>
     </div>
 </nav>
 
@@ -24,15 +20,19 @@
     <a class="button" href="https://github.com/LAURIDS0/lc_cctv" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Repository</a>
     <a class="button" href="https://github.com/LAURIDS0/lc_cctv/archive/refs/heads/main.zip"><i class="fa-solid fa-download"></i>Download</a>
 </div>
-<p>Hack a building's security room and turn its cameras off for a while. Every security room is a computer in the world with the camera server (NVR) behind it. Your other scripts (dispatch, police, cameras) can ask if a place is out of sight.</p>
-<img class="shot" src="images/lc_cctv/nvr.png" alt="The NVR's install notes in the browser and the camera list in the terminal" loading="lazy">
+<p>Break into a building's security room and watch its cameras live. The player finds the camera server's login, becomes root, reads the camera list and opens the cameras with <code>view &lt;ip&gt;</code>. Every camera opens in its own window, and several can be open at once.</p>
+<img class="shot" src="images/lc_cctv/cameras.png" alt="Three camera windows: one live, two frozen, and the camera list in the terminal" loading="lazy">
+
+<h2>Live and frozen</h2>
+<p>The game can only show one camera at a time. The window that was clicked last is <strong>live</strong>: the game shows that camera through it. The others <strong>freeze</strong> on their last picture with the time it was taken, until they are clicked. The last picture needs <a href="https://github.com/citizenfx/screenshot-basic" target="_blank" rel="noopener">screenshot-basic</a>; without it, a frozen window is black.</p>
 
 <h2>Installation</h2>
 <div class="steps">
 <h3>Install all resource dependencies</h3>
 <ul>
-    <li><a href="#~/lc_hack">LC Hack</a> 1.5.0 or newer</li>
+    <li><a href="#~/lc_hack">LC Hack</a> 1.7.0 or newer</li>
     <li><a href="https://github.com/overextended/ox_lib" target="_blank" rel="noopener">ox_lib</a></li>
+    <li><a href="https://github.com/citizenfx/screenshot-basic" target="_blank" rel="noopener">screenshot-basic</a> (optional, for frozen windows)</li>
 </ul>
 
 <h3>Download the resource</h3>
@@ -43,17 +43,18 @@
 
 <h3>Start the resource</h3>
 <pre data-lang="cfg">ensure ox_lib
+ensure screenshot-basic
 ensure lc_hack
 ensure lc_cctv</pre>
 
 <h3>Try it</h3>
-<p>Run <code>/cctvtest</code> as an admin. It creates a test security room where you stand, with its cameras covering 50 meters around you for 60 seconds.</p>
+<p>Run <code>/cctvtest</code> as an admin. It creates a security room where you stand, with four cameras around it looking at you.</p>
 </div>
 
 <h2>Next steps</h2>
 <ul>
-    <li><a href="#/site">Site</a>: add your own security rooms.</li>
-    <li><a href="#/guides/dispatch">Using it in Other Scripts</a>: skip camera alerts while an area is blind.</li>
+    <li><a href="#/guides/cameras">Placing Cameras</a>: find the coords and rotation for your cameras.</li>
+    <li><a href="#/site">Site</a>: every field of a security room.</li>
 </ul>
 </article>
 
@@ -63,20 +64,20 @@ ensure lc_cctv</pre>
 <article data-page="issues" data-crumb="LC CCTV">
 <h1>Common Issues</h1>
 
-<h2>"The cameras are already off."</h2>
-<p>The site was hacked a moment ago. Its cameras come back on after <a href="#/config/duration"><code>duration</code></a> seconds.</p>
+<h2>"view: ... Network is unreachable"</h2>
+<p>The cameras are on their own network. Log in to the NVR with <code>ssh</code> and run <code>view</code> from there.</p>
 
-<h2>"The security system is locked."</h2>
-<p>The site was hacked within <a href="#/config/cooldown"><code>cooldown</code></a> seconds (default <code>1800</code>), counted from the hack.</p>
+<h2>"view: cannot open display"</h2>
+<p>Camera windows need a desktop. The guard's computer has one by default; on a machine without one, run <code>startx</code> first.</p>
 
-<h2>Cameras are off, but my dispatch still sends camera alerts</h2>
-<p>LC CCTV doesn't change other scripts by itself. Check <a href="#/functions/server/isareablind"><code>isAreaBlind</code></a> in your dispatch script, see <a href="#/guides/dispatch">Using it in Other Scripts</a>.</p>
+<h2>Frozen windows are black</h2>
+<p>The last picture is taken with <a href="https://github.com/citizenfx/screenshot-basic" target="_blank" rel="noopener">screenshot-basic</a>. Start it before lc_hack.</p>
+
+<h2>A camera looks the wrong way</h2>
+<p><code>rotation</code> is <code>vec3(pitch, roll, heading)</code>: the heading is the direction it looks, and a negative pitch looks down. See <a href="#/guides/cameras">Placing Cameras</a>.</p>
 
 <h2>The computer doesn't show</h2>
-<ul>
-    <li>Check the site's <code>coords</code>. Without ox_target, it is an <code>[E]</code> point.</li>
-    <li>The server console prints <code>a site needs a name and coords</code> for sites that are missing them.</li>
-</ul>
+<p>The server console prints <code>a site needs a name, coords and cameras</code> for sites that are missing them.</p>
 </article>
 
 <!-- =====================================================================
@@ -88,39 +89,27 @@ ensure lc_cctv</pre>
 
 <h2>item</h2>
 <ul><li>item: <code>string</code> or <code>false</code>
-    <ul><li>An ox_inventory item a player needs to use a security computer. <code>false</code> for none. Defaults to <code>false</code>.</li></ul></li></ul>
+    <ul><li>An ox_inventory item needed to use a security computer. Defaults to <code>false</code>.</li></ul></li></ul>
 
 <h2>attempts</h2>
 <ul><li>attempts: <code>number</code>
-    <ul><li>Wrong passwords allowed per hack. Defaults to <code>3</code>.</li></ul></li></ul>
+    <ul><li>Wrong passwords allowed per hack, including camera passwords. Defaults to <code>3</code>.</li></ul></li></ul>
 
 <h2>desktop</h2>
-<ul><li>desktop: <code>string</code> or <code>false</code>
-    <ul><li>The guard's desktop, one of LC Hack's <a href="#~/lc_hack/guides/desktops">desktops</a>, <code>'random'</code>, or <code>false</code> for a terminal only. Defaults to <code>'random'</code>.</li></ul></li></ul>
+<ul><li>desktop: <code>string</code>
+    <ul><li>The guard's desktop, one of LC Hack's <a href="#~/lc_hack/guides/desktops">desktops</a> or <code>'random'</code>. The camera windows need a desktop. Defaults to <code>'random'</code>.</li></ul></li></ul>
 
-<h2>duration</h2>
-<ul><li>duration: <code>number</code>
-    <ul><li>Seconds the cameras stay off. A site can set its own. Defaults to <code>300</code>.</li></ul></li></ul>
-
-<h2>cooldown</h2>
-<ul><li>cooldown: <code>number</code>
-    <ul><li>Seconds before a site can be hacked again, counted from the hack. A site can set its own. Defaults to <code>1800</code>.</li></ul></li></ul>
+<h2>refresh</h2>
+<ul><li>refresh: <code>number</code> or <code>false</code>
+    <ul><li>Seconds between new networks and passwords for every site, so players can't reuse old ones. Hacks paused at a terminal are lost when it happens. Defaults to <code>3600</code>.</li></ul></li></ul>
 
 <h2>testCommand</h2>
 <ul><li>testCommand: <code>table</code> or <code>false</code>
-    <ul><li><code>name</code> (default <code>'cctvtest'</code>) and <code>restricted</code> (default <code>'group.admin'</code>). <code>false</code> for none.</li></ul></li></ul>
+    <ul><li><code>name</code> (default <code>'cctvtest'</code>) and <code>restricted</code> (default <code>'group.admin'</code>).</li></ul></li></ul>
 
 <h2>sites</h2>
 <ul><li>sites: <code>Site[]</code>
     <ul><li>The security rooms, see <a href="#/site">Site</a>.</li></ul></li></ul>
-
-<h2>onDisabled</h2>
-<ul><li>onDisabled: <code>function(source: number, site: string, duration: number)</code>
-    <ul><li>Called on the server when a site's cameras go off. <code>source</code> is <code>nil</code> when another script turned them off.</li></ul></li></ul>
-
-<h2>onRestored</h2>
-<ul><li>onRestored: <code>function(site: string)</code>
-    <ul><li>Called on the server when the cameras come back on.</li></ul></li></ul>
 </article>
 
 <!-- =====================================================================
@@ -128,21 +117,21 @@ ensure lc_cctv</pre>
      ===================================================================== -->
 <article data-page="site" data-crumb="LC CCTV">
 <h1>Site</h1>
-<p>Every security room is an entry in <code>sites</code> in <code>config.lua</code>.</p>
 <pre data-lang="lua">sites = {
     {
         name = 'bank',
         label = 'Pacific Standard',
         coords = vec3(264.5, 219.8, 101.7),
-        area = { coords = vec3(255.0, 225.0, 101.0), radius = 60.0 },
-        cameras = 8,
-        duration = 240,
+        cameras = {
+            { label = 'Lobby', coords = vec3(240.2, 213.5, 110.5), rotation = vec3(-20.0, 0.0, 250.0), fov = 70.0 },
+            { label = 'Vault', coords = vec3(255.1, 228.6, 103.9), rotation = vec3(-30.0, 0.0, 160.0) },
+        },
     },
 },</pre>
 
 <h2>name</h2>
 <ul><li>name: <code>string</code>
-    <ul><li>Unique and lowercase. Used in the hostnames (<code>bank-nvr01</code>) and by the exports.</li></ul></li></ul>
+    <ul><li>Unique and lowercase. Used in the hostnames: <code>bank-nvr01</code>, <code>bank-cam01</code>.</li></ul></li></ul>
 
 <h2>label</h2>
 <ul><li>label: <code>string</code>
@@ -152,134 +141,47 @@ ensure lc_cctv</pre>
 <ul><li>coords: <code>vector3</code>
     <ul><li>Where the guard's computer is.</li></ul></li></ul>
 
-<h2>area</h2>
-<ul><li>area?: <code>{ coords: vector3, radius: number }</code>
-    <ul><li>The area its cameras cover. Defaults to 50 meters around <code>coords</code>.</li></ul></li></ul>
-
 <h2>cameras</h2>
-<ul><li>cameras?: <code>number</code>
-    <ul><li>How many cameras the NVR lists. Only for the look. Defaults to <code>6</code>.</li></ul></li></ul>
-
-<h2>duration and cooldown</h2>
-<ul>
-    <li>duration?: <code>number</code>
-        <ul><li>Defaults to <a href="#/config/duration"><code>duration</code></a> in the config.</li></ul></li>
-    <li>cooldown?: <code>number</code>
-        <ul><li>Defaults to <a href="#/config/cooldown"><code>cooldown</code></a> in the config.</li></ul></li>
-</ul>
+<ul><li>cameras: <code>table[]</code>
+    <ul><li>The cameras, in the order they are numbered (<code>cam01</code> is <code>10.x.2.101</code>).</li></ul>
+    <ul>
+        <li>label?: <code>string</code>
+            <ul><li>The name in the camera list.</li></ul></li>
+        <li>coords: <code>vector3</code>
+            <ul><li>Where the camera is.</li></ul></li>
+        <li>rotation?: <code>vector3</code>
+            <ul><li><code>vec3(pitch, roll, heading)</code>. Defaults to <code>vec3(-15.0, 0.0, 0.0)</code>.</li></ul></li>
+        <li>fov?: <code>number</code>
+            <ul><li>Field of view in degrees. Defaults to <code>60.0</code>.</li></ul></li>
+    </ul></li></ul>
 
 <h2>desktop, radius and screen</h2>
 <ul>
-    <li>desktop?: <code>string</code> or <code>false</code>
-        <ul><li>This site's desktop. Defaults to the config's.</li></ul></li>
-    <li>radius?: <code>number</code>
-        <ul><li>How close the player must be to the computer.</li></ul></li>
-    <li>screen?: <code>table</code>
-        <ul><li>An in-world screen that shows the hack, like <a href="#~/lc_hack/guides/screens">LC Hack's screens</a>.</li></ul></li>
+    <li>desktop?: this site's desktop. Defaults to the config's.</li>
+    <li>radius?: <code>number</code>: how close the player must be to the computer.</li>
+    <li>screen?: <code>table</code>: an in-world screen, like <a href="#~/lc_hack/guides/screens">LC Hack's screens</a>.</li>
 </ul>
 </article>
 
 <!-- =====================================================================
-     Functions / Server
+     Guides / Placing Cameras
      ===================================================================== -->
-<article data-page="functions/server" data-crumb="LC CCTV / Functions">
-<h1>Server</h1>
+<article data-page="guides/cameras" data-crumb="LC CCTV / Guides">
+<h1>Placing Cameras</h1>
+<div class="steps">
+<h3>Stand where the camera hangs</h3>
+<p>Go to the corner of the room where the camera is, as high as you can, e.g. on a ladder or with noclip.</p>
 
-<h2>isAreaBlind</h2>
-<p>Checks if a position is inside an area whose cameras are off.</p>
-<pre data-lang="lua">exports.lc_cctv:isAreaBlind(coords)</pre>
-<ul><li>coords: <code>vector3</code></li></ul>
-<p>Return:</p>
-<ul>
-    <li><code>boolean</code> - Returns <code>true</code> if the position is out of sight.</li>
-    <li><code>string?</code> - The site's name.</li>
-</ul>
+<h3>Note the coords and the heading</h3>
+<p>Your position is the camera's <code>coords</code>. Look the way the camera should look: your heading is the camera's heading.</p>
 
-<h2>getBlindAreas</h2>
-<p>Every area whose cameras are off.</p>
-<pre data-lang="lua">exports.lc_cctv:getBlindAreas()</pre>
-<p>Return:</p>
-<ul><li><code>{ site, label, coords, radius, untilTime }[]</code> - <code>untilTime</code> is the <code>os.time()</code> the cameras come back on.</li></ul>
+<h3>Add the camera</h3>
+<pre data-lang="lua">{ label = 'Lobby', coords = vec3(240.2, 213.5, 110.5), rotation = vec3(-20.0, 0.0, 250.0), fov = 70.0 },</pre>
+<p>Start with a pitch of <code>-20.0</code> (looking a little down) and adjust. A wider <code>fov</code> shows more of the room.</p>
 
-<h2>disableCameras</h2>
-<p>Turns a site's cameras off from another script, e.g. after a power cut. It doesn't start the site's cooldown.</p>
-<pre data-lang="lua">exports.lc_cctv:disableCameras(site, duration)</pre>
-<ul>
-    <li>site: <code>string</code></li>
-    <li>duration?: <code>number</code>
-        <ul><li>Seconds. Defaults to the site's <code>duration</code>.</li></ul></li>
-</ul>
-<p>Return:</p>
-<ul><li><code>boolean</code> - Returns <code>false</code> if the site doesn't exist.</li></ul>
-
-<h2>restoreCameras</h2>
-<p>Turns a site's cameras back on before the time is up.</p>
-<pre data-lang="lua">exports.lc_cctv:restoreCameras(site)</pre>
-<ul><li>site: <code>string</code></li></ul>
-</article>
-
-<!-- =====================================================================
-     Functions / Client
-     ===================================================================== -->
-<article data-page="functions/client" data-crumb="LC CCTV / Functions">
-<h1>Client</h1>
-
-<h2>isBlind</h2>
-<p>Checks if a position is inside an area whose cameras are off.</p>
-<pre data-lang="lua">exports.lc_cctv:isBlind(coords)</pre>
-<ul><li>coords?: <code>vector3</code>
-    <ul><li>Defaults to the player's position.</li></ul></li></ul>
-<p>Return:</p>
-<ul>
-    <li><code>boolean</code> - Returns <code>true</code> if the position is out of sight.</li>
-    <li><code>string?</code> - The site's name.</li>
-</ul>
-<p>The same list is in <code>GlobalState.lc_cctv</code>.</p>
-</article>
-
-<!-- =====================================================================
-     Events
-     ===================================================================== -->
-<article data-page="events" data-crumb="LC CCTV">
-<h1>Events</h1>
-<div class="table"><table>
-<thead><tr><th>Name</th><th>Side</th><th>Data</th></tr></thead>
-<tbody>
-<tr><td><code>lc_cctv:disabled</code></td><td>server (<code>AddEventHandler</code>)</td><td><code>site, duration, source</code> (<code>source</code> is <code>nil</code> from <code>disableCameras</code>)</td></tr>
-<tr><td><code>lc_cctv:restored</code></td><td>server (<code>AddEventHandler</code>)</td><td><code>site</code></td></tr>
-<tr><td><code>lc_cctv:disabled</code></td><td>every client (<code>RegisterNetEvent</code>)</td><td><code>site, duration</code></td></tr>
-<tr><td><code>lc_cctv:restored</code></td><td>every client (<code>RegisterNetEvent</code>)</td><td><code>site</code></td></tr>
-</tbody></table></div>
-</article>
-
-<!-- =====================================================================
-     Guides / Using it in Other Scripts
-     ===================================================================== -->
-<article data-page="guides/dispatch" data-crumb="LC CCTV / Guides">
-<h1>Using it in Other Scripts</h1>
-<p>LC CCTV only says where the cameras are off; your other scripts decide what that means.</p>
-
-<h2>Skip camera alerts</h2>
-<p>Before your dispatch or robbery script sends a "seen on camera" alert, check the position:</p>
-<pre data-lang="lua">local function sendCameraAlert(coords, message)
-    if GetResourceState('lc_cctv') == 'started' and exports.lc_cctv:isAreaBlind(coords) then
-        return -- the cameras are off here
-    end
-    -- send the alert as usual
-end</pre>
-
-<h2>Tell the police</h2>
-<p>Use <code>onDisabled</code> in the config, or the event:</p>
-<pre data-lang="lua">AddEventHandler('lc_cctv:disabled', function(site, duration)
-    -- e.g. a quiet alert: "Camera system offline at the bank"
-end)</pre>
-
-<h2>Show it to the player</h2>
-<pre data-lang="lua">RegisterNetEvent('lc_cctv:disabled', function(site, duration)
-    if exports.lc_cctv:isBlind() then
-        lib.notify({ description = ('Cameras off for %d seconds'):format(duration) })
-    end
-end)</pre>
+<h3>Check it</h3>
+<p>Restart lc_cctv, hack the site and <code>view</code> the camera.</p>
+</div>
 </article>
 
 <!-- =====================================================================
@@ -287,18 +189,42 @@ end)</pre>
      ===================================================================== -->
 <article data-page="guides/playing" data-crumb="LC CCTV / Guides">
 <h1>Playing</h1>
-
 <div class="steps">
 <h3>Use the guard's computer</h3>
-<p>The shift notes on the desktop tell where the camera server (the NVR) is.</p>
+<p>The shift notes on the desktop name the camera server (the NVR) and its web panel.</p>
 
 <h3>Find the NVR's login</h3>
-<p>Its web panel gives it away. Open it in the browser or with <code>curl</code>: the page source, the install notes it links to, or a note on the guard's desktop (in base64, <code>base64 -d</code>).</p>
+<p>Its web panel gives it away: in the page source (<code>curl</code>), in install notes it links to, or in a note on the guard's desktop (in base64, <code>base64 -d</code>).</p>
 
-<h3>Log in</h3>
-<p><code>ssh admin@&lt;nvr&gt;</code>. <code>/etc/nvr/cameras.conf</code> lists the cameras.</p>
+<h3>Become root on the NVR</h3>
+<p><code>ssh admin@&lt;nvr&gt;</code>. The camera list is root only; the root password is on the NVR (a config, the program itself with <code>strings</code>, or the shell history). An old one is there too.</p>
 
-<h3>Find the root password and become root</h3>
-<p>It is on the NVR: in a config file, in the program itself (<code>strings</code>) or in the shell history. A backup with an old password is there too. Run <code>su</code> with it: the cameras go off.</p>
+<h3>Read the camera list</h3>
+<p><code>cat /etc/nvr/cameras.conf</code> lists every camera with its IP and password.</p>
+
+<h3>Watch the cameras</h3>
+<p><code>view &lt;ip&gt;</code> for each camera, with its password. Click a window to make it live. More terminals help: open another one from the dock to keep working while you watch.</p>
 </div>
+</article>
+
+<!-- =====================================================================
+     Guides / How it Works
+     ===================================================================== -->
+<article data-page="guides/how-it-works" data-crumb="LC CCTV / Guides">
+<h1>How it Works</h1>
+<ul>
+    <li>Every site is an LC Hack terminal with <code>target = false</code>: the player watches until they close it.</li>
+    <li>The cameras are LC Hack <a href="#~/lc_hack/hackconfig/machine">machines</a> with a <code>camera</code> field. LC Hack's <code>view</code> command and camera windows do the rest, see <a href="#~/lc_hack/guides/desktops">Desktops</a>.</li>
+    <li>The cameras' firewalls only let the NVR in, and the camera list is root only on the NVR.</li>
+    <li>Every password stays on the server, including the cameras', and every attempt is checked there.</li>
+</ul>
+
+<h2>Files</h2>
+<div class="table"><table>
+<thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+<tbody>
+<tr><td><code>config.lua</code></td><td>Everything you can change, including the sites and cameras.</td></tr>
+<tr><td><code>server/main.lua</code></td><td>The terminals, the refresh and the test command.</td></tr>
+<tr><td><code>server/network.lua</code></td><td>Builds the security network with new passwords. Plain Lua, so it can be tested on its own.</td></tr>
+</tbody></table></div>
 </article>

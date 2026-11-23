@@ -43,9 +43,9 @@
         "id": "lc_cctv",
         "name": "LC CCTV",
         "icon": "fa-solid fa-video",
-        "description": "Hack a building's security room and turn its cameras off for a while. Built on LC Hack.",
+        "description": "Break into a security room and watch its cameras live, in several windows at once. Built on LC Hack.",
         "github": "https://github.com/LAURIDS0/lc_cctv",
-        "image": "images/lc_cctv/nvr.png",
+        "image": "images/lc_cctv/cameras.png",
         "status": "released",
         "updated": "November 23, 2026"
     },

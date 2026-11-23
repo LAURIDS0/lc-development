@@ -91,7 +91,7 @@
     {
       "fullLink": "https://github.com/LAURIDS0/lc_cctv",
       "name": "LC CCTV",
-      "description": "Hack a building's security room and turn its cameras off for a while. Built on LC Hack.",
+      "description": "Break into a security room and watch its cameras live, in several windows at once. Built on LC Hack.",
       "readmeBranch": "main",
       "docs": "docs/#/lc_cctv",
       "tags": [

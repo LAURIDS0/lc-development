@@ -298,6 +298,8 @@ end)</pre>
         <ul><li>Your own files as <code>[path] = content</code>, see <a href="#/hackconfig/files">Files</a>.</li></ul></li>
     <li>locked?: <code>string[]</code>
         <ul><li>Extra paths only root can read, e.g. <code>{ '~/secret.txt' }</code>.</li></ul></li>
+    <li>camera?: <code>{ coords: vector3, rotation?: vector3, fov?: number }</code>
+        <ul><li>Makes the machine a camera in the world. The player opens it with <code>view &lt;ip&gt;</code> (port <code>554</code>) and its <code>password</code>, and watches it live in a window. Pass plain tables (<code>{ x, y, z }</code>). A camera gets the ports <code>{ 80, 554 }</code>. See <a href="#~/lc_cctv">LC CCTV</a>.</li></ul></li>
     <li>onRoot?: <code>function(source: number, machine: HackMachine)</code>
         <ul><li>Called on the server when the player gets root on this machine with the right password. Use it for rewards on machines that aren't the <code>target</code>.</li></ul></li>
 </ul>
@@ -1195,12 +1197,13 @@ end)</pre>
 
 <h2>Apps</h2>
 <ul>
-    <li><strong>Terminal</strong> - the real CLI in a window. It shares the login stack, so <code>ssh</code>, <code>su</code> and everything else works. Closing the window keeps its history.</li>
+    <li><strong>Terminal</strong> - the real CLI in a window. Open it again for another terminal: each one has its own logins, folder and history, so the player can be on several machines at once. <code>exit</code> on the last login closes an extra terminal.</li>
     <li><strong>Files</strong> - browse the desktop machine's files, with Home, Desktop, Documents, Downloads, Pictures and <code>/</code> in the sidebar. Double click opens a folder, an image in the image viewer and anything else in the editor. Drag files onto a folder, another window or the desktop to move them. Locked files show a lock and an error dialog.</li>
     <li><strong>Text Editor</strong> - opens, edits and saves files. Save with the button or <code>Ctrl+S</code>. The path field decides where the file is saved; relative paths start in the home directory, and new files go to the desktop. Users can save in their home directory and <code>/tmp</code>, root everywhere.</li>
     <li><strong>Image viewer</strong> - shows the images in a folder with previous / next. Opened from the dock, it starts in <code>~/Pictures</code>.</li>
     <li><strong>Browser</strong> - works like <code>curl</code> from the desktop's machine: same <code>/etc/hosts</code>, network and firewall. <code>http://10.0.0.30/</code> shows <code>/var/www/html/index.html</code> on that machine, <code>http://web01/notes.txt</code> shows <code>/var/www/html/notes.txt</code>. Pages are sandboxed, scripts never run.</li>
     <li><strong>System monitor</strong> - the same processes as <code>ps aux</code>.</li>
+    <li><strong>Cameras</strong> - every camera opened with <code>view</code> gets its own window, and several can be open at once. The one clicked last is live; the others freeze on their last picture with a timestamp (needs <a href="https://github.com/citizenfx/screenshot-basic" target="_blank" rel="noopener">screenshot-basic</a>). The game camera is turned and widened so the camera's view fits the window.</li>
 </ul>
 <h2>The desktop is ~/Desktop</h2>
 <p>The icons on the desktop are the files in <code>~/Desktop</code> of the desktop's user. Anything saved or moved there (editor, <code>echo &gt;</code>, <code>touch</code>, <code>mv</code>, drag and drop) shows up on the desktop right away, and files dragged onto the desktop are moved to <code>~/Desktop</code>.</p>
@@ -1301,6 +1304,7 @@ end)</pre>
 <tbody>
 <tr><td><code>whoami</code>, <code>id</code></td><td>The current user.</td></tr>
 <tr><td><code>hostname [-I]</code></td><td>The machine's name, or its IPs with <code>-I</code>.</td></tr>
+<tr><td><code>view [user@]&lt;ip&gt;</code></td><td>Open a camera's live view in a window. Needs a desktop, a route to the camera (port <code>554</code>) and its password.</td></tr>
 <tr><td><code>uname [-a]</code>, <code>date</code></td><td>System information.</td></tr>
 <tr><td><code>ps aux</code></td><td>Running processes, including the machine's <code>processes</code>.</td></tr>
 <tr><td><code>du [-s] [-h] [path]</code>, <code>df [-h]</code></td><td>Disk usage of a folder, and free disk space.</td></tr>
