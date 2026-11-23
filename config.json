@@ -67,6 +67,28 @@
       }
     },
     {
+      "fullLink": "https://github.com/LAURIDS0/lc_datahack",
+      "name": "LC Datahack",
+      "description": "Break into company networks and steal their data. Built on LC Hack.",
+      "readmeBranch": "main",
+      "docs": "docs/#/lc_datahack",
+      "tags": [
+        "FiveM",
+        "Free",
+        "Hacking"
+      ],
+      "image": {
+        "src": "images/lc_datahack.png",
+        "name": "Free",
+        "alt": "lc_datahack preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
       "fullLink": "https://github.com/LAURIDS0/lc_jobgarages",
       "name": "LC Job Garages",
       "description": "A simple job garages script for FiveM.",

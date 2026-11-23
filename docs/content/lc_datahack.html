@@ -1,0 +1,284 @@
+<!-- Sidebar: data-page is the article's id, data-folder groups pages -->
+<nav data-nav>
+    <a data-page="index">Overview</a>
+    <a data-page="issues">Common Issues</a>
+    <a data-page="config">Config</a>
+    <a data-page="site">Site</a>
+    <div data-folder="Guides">
+        <a data-page="guides/new-site">Adding a Company</a>
+        <a data-page="guides/playing">Playing</a>
+        <a data-page="guides/how-it-works">How it Works</a>
+    </div>
+</nav>
+
+<!-- =====================================================================
+     Overview
+     ===================================================================== -->
+<article data-page="index">
+<h1>LC Datahack</h1>
+<div class="buttons">
+    <a class="button" href="https://github.com/LAURIDS0/lc_datahack" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Repository</a>
+    <a class="button" href="https://github.com/LAURIDS0/lc_datahack/archive/refs/heads/main.zip"><i class="fa-solid fa-download"></i>Download</a>
+</div>
+<p>Break into company networks and steal their data. Every company is a computer in the world with a network behind it: the player finds the login for the next server, hops from server to server and gets root on the file server. The player gets the company's data as an item, and the network goes offline for a while.</p>
+<img class="shot" src="images/lc_datahack/network.png" alt="Finding a login, hopping to the next server and reaching the file server" loading="lazy">
+
+<h2>Features</h2>
+<ul>
+    <li>A new network every time: new passwords, hidden in new places (config files, shell history, scripts, base64 notes, binaries), with a decoy.</li>
+    <li>1 to 5 servers per company, each only reachable from the one before it.</li>
+    <li>Built on <a href="#~/lc_hack">LC Hack</a>'s terminals: ox_target or <code>[E]</code>, pausing, and optional in-world screens.</li>
+    <li>A USB drive to start, the data as an item, and a cooldown per company.</li>
+</ul>
+
+<h2>Installation</h2>
+<div class="steps">
+<h3>Install all resource dependencies</h3>
+<ul>
+    <li><a href="#~/lc_hack">LC Hack</a> 1.5.0 or newer</li>
+    <li><a href="https://github.com/overextended/ox_lib" target="_blank" rel="noopener">ox_lib</a></li>
+    <li><a href="https://github.com/overextended/ox_inventory" target="_blank" rel="noopener">ox_inventory</a> (optional, for the USB drive and the data item)</li>
+</ul>
+
+<h3>Download the resource</h3>
+<ul>
+    <li>Download the <a href="https://github.com/LAURIDS0/lc_datahack/archive/refs/heads/main.zip">latest version</a> and unzip it as <code>lc_datahack</code>.</li>
+    <li>Or clone the repository: <code>git clone https://github.com/LAURIDS0/lc_datahack.git</code></li>
+</ul>
+
+<h3>Start the resource</h3>
+<pre data-lang="cfg">ensure ox_lib
+ensure lc_hack
+ensure lc_datahack</pre>
+
+<h3>Add the items</h3>
+<p>With ox_inventory, add them to <code>ox_inventory/data/items.lua</code>:</p>
+<pre data-lang="lua">['usb_drive'] = {
+    label = 'USB Drive',
+    weight = 20,
+},
+
+['data_usb'] = {
+    label = 'Stolen Data',
+    weight = 20,
+    stack = false,
+},</pre>
+
+<h3>Try it</h3>
+<p>Run <code>/datahacktest</code> as an admin. It creates a test company where you stand; use the computer with a USB drive in your inventory.</p>
+</div>
+
+<h2>Next steps</h2>
+<ul>
+    <li><a href="#/guides/new-site">Adding a Company</a>: put your own companies in the world.</li>
+    <li><a href="#/config">Config</a>: items, cooldown, difficulty and more.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Common Issues
+     ===================================================================== -->
+<article data-page="issues" data-crumb="LC Datahack">
+<h1>Common Issues</h1>
+<p>Problems that come up when setting up lc_datahack, and how to solve them.</p>
+
+<h2>"You need a USB drive."</h2>
+<p>With ox_inventory, the player needs the <a href="#/config/item"><code>item</code></a> (default <code>usb_drive</code>). Set <code>item = false</code> to let everyone hack.</p>
+
+<h2>"The ... network is offline."</h2>
+<p>The company's data was stolen a moment ago. It is back after <a href="#/config/cooldown"><code>cooldown</code></a> seconds (default <code>1800</code>).</p>
+
+<h2>The computer doesn't show</h2>
+<ul>
+    <li>Check the site's <a href="#/site/coords"><code>coords</code></a>. Without ox_target, it is an <code>[E]</code> point.</li>
+    <li>The server console prints <code>a site needs a name and coords</code> for sites that are missing them.</li>
+    <li>LC Hack 1.5.0 or newer is required.</li>
+</ul>
+
+<h2>No data item</h2>
+<p>The item is only given when ox_inventory is started. Without it, give rewards in <a href="#/config/onstolen"><code>onStolen</code></a>.</p>
+</article>
+
+<!-- =====================================================================
+     Config
+     ===================================================================== -->
+<article data-page="config" data-crumb="LC Datahack">
+<h1>Config</h1>
+<p>Everything is in <code>config.lua</code> in the resource folder. It is only loaded on the server. Restart the resource after changing it.</p>
+
+<h2>item</h2>
+<ul><li>item: <code>string</code> or <code>false</code>
+    <ul><li>The ox_inventory item a player needs to use a company's computer. <code>false</code> for none. Defaults to <code>'usb_drive'</code>.</li></ul></li></ul>
+
+<h2>consumeItem</h2>
+<ul><li>consumeItem: <code>boolean</code>
+    <ul><li>Remove one <code>item</code> when the data is stolen. Defaults to <code>true</code>.</li></ul></li></ul>
+
+<h2>reward</h2>
+<ul><li>reward: <code>table</code> or <code>false</code>
+    <ul><li>The data item, with ox_inventory. Its label becomes "<em>Company</em> data", and its metadata has <code>company</code> (the site's name).</li></ul>
+    <ul>
+        <li>item: <code>string</code>
+            <ul><li>Defaults to <code>'data_usb'</code>.</li></ul></li>
+        <li>count?: <code>number</code>
+            <ul><li>Defaults to <code>1</code>.</li></ul></li>
+    </ul></li></ul>
+
+<h2>attempts</h2>
+<ul><li>attempts: <code>number</code>
+    <ul><li>Wrong passwords allowed per hack. Defaults to <code>3</code>.</li></ul></li></ul>
+
+<h2>desktop</h2>
+<ul><li>desktop: <code>string</code> or <code>false</code>
+    <ul><li>The workstation's desktop, one of LC Hack's <a href="#~/lc_hack/guides/desktops">desktops</a>, <code>'random'</code>, or <code>false</code> for a terminal only. A site can set its own. Defaults to <code>'random'</code>.</li></ul></li></ul>
+
+<h2>cooldown</h2>
+<ul><li>cooldown: <code>number</code>
+    <ul><li>Seconds a company's network is offline after its data was stolen. A site can set its own. Defaults to <code>1800</code>.</li></ul></li></ul>
+
+<h2>testCommand</h2>
+<ul><li>testCommand: <code>table</code> or <code>false</code>
+    <ul><li>A command that creates a test company where you stand. <code>false</code> for none.</li></ul>
+    <ul>
+        <li>name: <code>string</code>
+            <ul><li>Defaults to <code>'datahacktest'</code>.</li></ul></li>
+        <li>restricted?: <code>string</code> or <code>false</code>
+            <ul><li>Defaults to <code>'group.admin'</code>.</li></ul></li>
+    </ul></li></ul>
+
+<h2>sites</h2>
+<ul><li>sites: <code>Site[]</code>
+    <ul><li>The companies, see <a href="#/site">Site</a>.</li></ul></li></ul>
+
+<h2>onStolen</h2>
+<ul><li>onStolen: <code>function(source: number, site: string)</code>
+    <ul><li>Called on the server for every theft, with or without ox_inventory. <code>site</code> is the site's <code>name</code>.</li></ul></li></ul>
+<p><strong>Example</strong></p>
+<pre data-lang="lua">onStolen = function(source, site)
+    -- Alert the police, give XP, ...
+    print(('%s stole the data of %s'):format(GetPlayerName(source), site))
+end,</pre>
+</article>
+
+<!-- =====================================================================
+     Site
+     ===================================================================== -->
+<article data-page="site" data-crumb="LC Datahack">
+<h1>Site</h1>
+<p>Every company is an entry in <code>sites</code> in <code>config.lua</code>.</p>
+<pre data-lang="lua">sites = {
+    {
+        name = 'lifeinvader',
+        label = 'Lifeinvader',
+        coords = vec3(-1054.2, -230.6, 44.0),
+        hops = 2,
+    },
+},</pre>
+
+<h2>name</h2>
+<ul><li>name: <code>string</code>
+    <ul><li>Unique and lowercase. It is used in the hostnames, e.g. <code>lifeinvader-files01</code>.</li></ul></li></ul>
+
+<h2>label</h2>
+<ul><li>label: <code>string</code>
+    <ul><li>The company's name, shown on the computer and the data item.</li></ul></li></ul>
+
+<h2>coords</h2>
+<ul><li>coords: <code>vector3</code>
+    <ul><li>Where the computer is.</li></ul></li></ul>
+
+<h2>hops</h2>
+<ul><li>hops?: <code>number</code>
+    <ul><li>Servers between the workstation and the data, including the file server: <code>1</code> to <code>5</code>. More hops = a harder hack. Defaults to <code>2</code>.</li></ul></li></ul>
+
+<h2>desktop</h2>
+<ul><li>desktop?: <code>string</code> or <code>false</code>
+    <ul><li>This site's workstation desktop. Defaults to <a href="#/config/desktop"><code>desktop</code></a> in the config.</li></ul></li></ul>
+
+<h2>cooldown</h2>
+<ul><li>cooldown?: <code>number</code>
+    <ul><li>This site's cooldown. Defaults to <a href="#/config/cooldown"><code>cooldown</code></a> in the config.</li></ul></li></ul>
+
+<h2>radius</h2>
+<ul><li>radius?: <code>number</code>
+    <ul><li>How close the player must be. Defaults to LC Hack's terminal radius (<code>1.5</code>).</li></ul></li></ul>
+
+<h2>screen</h2>
+<ul><li>screen?: <code>table</code>
+    <ul><li>An in-world screen that shows the hack to everyone nearby, like <a href="#~/lc_hack/guides/screens">LC Hack's screens</a>.</li></ul></li></ul>
+</article>
+
+<!-- =====================================================================
+     Guides / Adding a Company
+     ===================================================================== -->
+<article data-page="guides/new-site" data-crumb="LC Datahack / Guides">
+<h1>Adding a Company</h1>
+
+<div class="steps">
+<h3>Find the computer</h3>
+<p>Stand at the desk or server rack where players should hack, and note your position, e.g. with <code>/datahacktest</code> or your coordinates tool.</p>
+
+<h3>Add the site</h3>
+<pre data-lang="lua">sites = {
+    {
+        name = 'maze',
+        label = 'Maze Bank',
+        coords = vec3(-75.4, -818.6, 243.4),
+        hops = 4,          -- a bank: make it hard
+        cooldown = 3600,
+    },
+},</pre>
+
+<h3>Add a screen (optional)</h3>
+<p>A monitor on the wall that shows the hack to everyone nearby. See <a href="#~/lc_hack/guides/screens">Screens</a> for the fields.</p>
+
+<h3>Restart and test</h3>
+<p>Restart <code>lc_datahack</code> and use the computer with a USB drive.</p>
+</div>
+</article>
+
+<!-- =====================================================================
+     Guides / Playing
+     ===================================================================== -->
+<article data-page="guides/playing" data-crumb="LC Datahack / Guides">
+<h1>Playing</h1>
+<p>What the player does, from the computer to the data.</p>
+
+<div class="steps">
+<h3>Use the computer</h3>
+<p>With a USB drive in the inventory, use the company's computer. The workstation opens, with a welcome note on the desktop.</p>
+
+<h3>Find the first login</h3>
+<p>The login for the first server is somewhere on the workstation: shell history (<code>cat ~/.bash_history</code>), a script, a config file or a note. Notes may be in base64: <code>base64 -d &lt;text&gt;</code>. <code>/etc/hosts</code> shows the server's name.</p>
+
+<h3>Hop from server to server</h3>
+<p><code>ssh user@server</code>, then look for the next login there. Each server only accepts the one before it, so the player can't skip one.</p>
+
+<h3>Get root on the file server</h3>
+<p>The file server has the data in <code>/srv/data</code>. Its root password is somewhere on it, maybe in a binary (<code>strings</code>). Run <code>su</code> with it: the data is stolen.</p>
+</div>
+<div class="callout"><i class="fa-solid fa-circle-info"></i><div><p>An old password is planted on the way. Every wrong password costs an attempt, and the hack fails when they run out.</p></div></div>
+</article>
+
+<!-- =====================================================================
+     Guides / How it Works
+     ===================================================================== -->
+<article data-page="guides/how-it-works" data-crumb="LC Datahack / Guides">
+<h1>How it Works</h1>
+<p>lc_datahack is a hack type built on <a href="#~/lc_hack/functions/server/createterminal">createTerminal</a>.</p>
+<ul>
+    <li>Every site is an LC Hack terminal. Its config is a company network: the workstation, the servers in a chain, and the file server as the <code>target</code>.</li>
+    <li><code>canUse</code> checks the cooldown and the USB drive before a hack starts.</li>
+    <li><code>onSuccess</code> gives the data, takes the site offline and builds a new network with new passwords.</li>
+    <li>Every password stays on the server, and every attempt is checked there, like in any LC Hack hack.</li>
+</ul>
+
+<h2>Files</h2>
+<div class="table"><table>
+<thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+<tbody>
+<tr><td><code>config.lua</code></td><td>Everything you can change, including the sites.</td></tr>
+<tr><td><code>server/main.lua</code></td><td>The terminals, the checks, the reward and the test command.</td></tr>
+<tr><td><code>server/network.lua</code></td><td>Builds a company network with new passwords. Plain Lua, so it can be tested on its own.</td></tr>
+</tbody></table></div>
+</article>

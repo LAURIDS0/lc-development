@@ -30,6 +30,16 @@
         "updated": "November 23, 2026"
     },
     {
+        "id": "lc_datahack",
+        "name": "LC Datahack",
+        "icon": "fa-solid fa-database",
+        "description": "Break into company networks and steal their data. Built on LC Hack.",
+        "github": "https://github.com/LAURIDS0/lc_datahack",
+        "image": "images/lc_datahack/network.png",
+        "status": "released",
+        "updated": "November 23, 2026"
+    },
+    {
         "id": "lc_jobgarages",
         "name": "LC Job Garages",
         "icon": "fa-solid fa-truck-medical",

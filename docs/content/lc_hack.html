@@ -433,6 +433,8 @@ end)</pre>
                 <ul><li>Called on too many wrong passwords, when the player walks away from a closed terminal (see <code>keepDistance</code>) or drops.</li></ul></li>
             <li>keepDistance?: <code>number</code>
                 <ul><li>Closing the terminal pauses the hack: logins, files, history and attempts are kept, and the player continues where they left off when they use it again. The paused hack is discarded once the player is further away than this. Defaults to <code>10.0</code>.</li></ul></li>
+            <li>canUse?: <code>function(source: number, id: number | string)</code>
+                <ul><li>Called on the server before a player starts the hack. Return <code>false</code> and an optional message to stop them, e.g. for a missing item or a cooldown. The message is shown with an ox_lib notification.</li></ul></li>
         </ul>
     </li>
 </ul>
@@ -604,6 +606,7 @@ end)</pre>
 <tr><td><code>onSuccess(source, id)</code></td><td><a href="#/functions/server/createterminal">createTerminal</a></td><td>The player got root on the <code>target</code>.</td></tr>
 <tr><td><code>onFail(source, id)</code></td><td><a href="#/functions/server/createterminal">createTerminal</a></td><td>Too many wrong passwords, the player walked away from a paused terminal, dropped, or <code>stopHack</code> was called.</td></tr>
 <tr><td><code>cb(success)</code></td><td><a href="#/functions/server/starthack">startHack</a></td><td>The hack ended. Closing the window counts as a failure.</td></tr>
+<tr><td><code>canUse(source, id)</code></td><td><a href="#/functions/server/createterminal">createTerminal</a></td><td>A player is about to use the terminal. Return <code>false, message</code> to stop them.</td></tr>
 <tr><td><code>onRoot(source, machine)</code></td><td><a href="#/hackconfig/machine">a machine</a></td><td>The player got root on that machine.</td></tr>
 <tr><td><code>commands[name](source, args)</code></td><td><a href="#/hackconfig/game">HackConfig</a></td><td>The player ran your command. Return the lines to print.</td></tr>
 <tr><td><code>cb(success, ...)</code></td><td><a href="#/functions/server/startgame">startGame</a></td><td>The minigame ended.</td></tr>
@@ -883,6 +886,7 @@ echo "&lt;h1&gt;My blog&lt;/h1&gt;" &gt; /var/www/html/blog/index.html</pre>
 <tr><td><a href="#/hackconfig/game"><code>commands</code></a></td><td>Your own terminal commands. They run on the server, in your resource.</td></tr>
 <tr><td><a href="#/functions/server/addmachine"><code>addMachine</code></a></td><td>Adds a machine to a running hack, e.g. a device a command found.</td></tr>
 <tr><td><a href="#/hackconfig/machine"><code>onRoot</code></a></td><td>Called on the server when the player gets root on a machine. Give the reward here.</td></tr>
+<tr><td><a href="#/functions/server/createterminal"><code>canUse</code></a></td><td>Decides if a player may use a terminal, e.g. an item or a cooldown. <a href="#~/lc_datahack">LC Datahack</a> uses it.</td></tr>
 </tbody></table></div>
 <p>Add <code>target = false</code> for a hack without a goal: it stays open until the player closes it, so they can hack one device after the other.</p>
 
