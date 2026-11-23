@@ -89,6 +89,28 @@
       }
     },
     {
+      "fullLink": "https://github.com/LAURIDS0/lc_cctv",
+      "name": "LC CCTV",
+      "description": "Hack a building's security room and turn its cameras off for a while. Built on LC Hack.",
+      "readmeBranch": "main",
+      "docs": "docs/#/lc_cctv",
+      "tags": [
+        "FiveM",
+        "Free",
+        "Hacking"
+      ],
+      "image": {
+        "src": "images/lc_cctv.png",
+        "name": "Free",
+        "alt": "lc_cctv preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
       "fullLink": "https://github.com/LAURIDS0/lc_jobgarages",
       "name": "LC Job Garages",
       "description": "A simple job garages script for FiveM.",
