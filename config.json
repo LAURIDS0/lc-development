@@ -26,7 +26,7 @@
     {
       "fullLink": "https://github.com/LAURIDS0/lc_phonehack",
       "name": "LC Phonehack",
-      "description": "Hack the phones of NPCs nearby with a laptop. Built on LC Hack.",
+      "description": "Hack the phones of NPCs nearby with LC Hack's laptop. An example of a device type.",
       "readmeBranch": "main",
       "docs": "docs/#/lc_phonehack",
       "tags": [
@@ -48,7 +48,7 @@
     {
       "fullLink": "https://github.com/LAURIDS0/lc_keyclone",
       "name": "LC Keyclone",
-      "description": "Clone vehicle keys and door keycards with a key cloner. Built on LC Hack.",
+      "description": "Clone vehicle keys and door keycards with LC Hack's laptop. An example of device types.",
       "readmeBranch": "main",
       "docs": "docs/#/lc_keyclone",
       "tags": [

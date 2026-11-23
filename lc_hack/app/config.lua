@@ -4,6 +4,24 @@
 -- =====================================================================
 
 return {
+    -- The player's own laptop. "scan" finds the devices other resources add with
+    -- registerDevice (lc_phonehack, lc_keyclone, ...), "connect <ID>" connects to one.
+    -- With ox_inventory, the "laptop" item opens it (see README).
+    laptop = {
+        -- Without ox_inventory: a command that opens the laptop. false = no command.
+        -- restricted = an ace, e.g. 'group.admin', or false for everyone
+        command = { name = 'laptop', restricted = false },
+
+        -- 'kali', 'ubuntu', 'macos', 'chromeos', 'mint', 'fedora', 'random' or false for a terminal only
+        desktop = 'kali',
+
+        -- Wrong passwords allowed before the laptop closes
+        attempts = 4,
+
+        -- Most devices "scan" lists at once, closest first
+        maxDevices = 10,
+    },
+
     -- Servers that are always on. They are part of every hack, and every machine can
     -- reach them (like the internet) unless their firewall blocks it.
     -- Same fields as a machine in a HackConfig's network, plus:

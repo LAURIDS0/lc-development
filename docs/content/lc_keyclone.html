@@ -3,9 +3,6 @@
     <a data-page="index">Overview</a>
     <a data-page="issues">Common Issues</a>
     <a data-page="config">Config</a>
-    <div data-folder="Functions">
-        <a data-page="functions/server">Server</a>
-    </div>
     <div data-folder="Guides">
         <a data-page="guides/keys">Key Scripts</a>
         <a data-page="guides/readers">Keycard Readers</a>
@@ -23,17 +20,18 @@
     <a class="button" href="https://github.com/LAURIDS0/lc_keyclone" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Repository</a>
     <a class="button" href="https://github.com/LAURIDS0/lc_keyclone/archive/refs/heads/main.zip"><i class="fa-solid fa-download"></i>Download</a>
 </div>
-<p>Clone vehicle keys and door keycards with a key cloner. The player gets <a href="#~/lc_hack">LC Hack</a>'s terminal and desktop with two extra commands: <code>scan</code> finds parked vehicles and keycard readers nearby, and <code>connect</code> connects to one. Then the player logs in, finds the code and uses it with <code>su</code>.</p>
+<p>Clone vehicle keys and door keycards. lc_keyclone adds parked vehicles and keycard readers to <a href="#~/lc_hack/config/laptop">LC Hack's laptop</a>: when the player runs <code>scan</code> on it, they show up, and <code>connect</code> connects to one. Then the player logs in, finds the code and uses it with <code>su</code>.</p>
+<p>It is also an example of how to build on LC Hack: two device types with <a href="#~/lc_hack/functions/server/registerdevice">registerDevice</a>, see <a href="#/guides/how-it-works">How it Works</a>.</p>
 <img class="shot" src="images/lc_keyclone/device.png" alt="Scanning, connecting to a vehicle and finding its code" loading="lazy">
 
 <h2>Installation</h2>
 <div class="steps">
 <h3>Install all resource dependencies</h3>
 <ul>
-    <li><a href="#~/lc_hack">LC Hack</a> 1.4.0 or newer</li>
+    <li><a href="#~/lc_hack">LC Hack</a> 1.8.0 or newer (the laptop and <code>registerDevice</code>)</li>
     <li><a href="https://github.com/overextended/ox_lib" target="_blank" rel="noopener">ox_lib</a></li>
     <li>A vehicle key script (optional): qbx_vehiclekeys, qb-vehiclekeys, wasabi_carlock, qs-vehiclekeys, MrNewbVehicleKeys, jaksam's vehicles_keys or cd_garage, see <a href="#/guides/keys">Key Scripts</a>.</li>
-    <li><a href="https://github.com/overextended/ox_inventory" target="_blank" rel="noopener">ox_inventory</a> (optional, for the device and the keycards)</li>
+    <li><a href="https://github.com/overextended/ox_inventory" target="_blank" rel="noopener">ox_inventory</a> (optional, for the keycards)</li>
     <li>OneSync, so the server knows the vehicles.</li>
 </ul>
 
@@ -48,16 +46,8 @@
 ensure lc_hack
 ensure lc_keyclone</pre>
 
-<h3>Add the device</h3>
-<p>With ox_inventory, add the key cloner to <code>ox_inventory/data/items.lua</code>. <code>consume = 0</code> keeps it when it's used.</p>
-<pre data-lang="lua">['key_cloner'] = {
-    label = 'Key Cloner',
-    weight = 800,
-    stack = false,
-    consume = 0,
-    server = { export = 'lc_keyclone.useCloner' },
-},</pre>
-<p>Without ox_inventory, players open it with <code>/keycloner</code>, see <a href="#/config/command">command</a>.</p>
+<h3>Set up the laptop</h3>
+<p>Players use <a href="#~/lc_hack/config/laptop">LC Hack's laptop</a>. Set up its item if you haven't.</p>
 
 <h3>Add keycard readers</h3>
 <p>Vehicles work right away. Doors need a reader in the config, see <a href="#/guides/readers">Keycard Readers</a>.</p>
@@ -99,8 +89,8 @@ ensure lc_keyclone</pre>
 <h2>The cloned keycard doesn't open the door</h2>
 <p>Add the reader's <code>item</code> to the door's <code>items</code> in ox_doorlock. LC Keyclone only gives the item; ox_doorlock decides what it opens.</p>
 
-<h2>/keycloner doesn't exist</h2>
-<p>The command is only added when ox_inventory isn't started. With ox_inventory, players use the <code>key_cloner</code> item.</p>
+<h2>The laptop doesn't open</h2>
+<p>The laptop belongs to LC Hack. With ox_inventory, the <code>laptop</code> item's <code>server.export</code> must be <code>lc_hack.useLaptop</code>; without ox_inventory, players use <code>/laptop</code>. See <a href="#~/lc_hack/config/laptop">LC Hack's laptop</a>.</p>
 </article>
 
 <!-- =====================================================================
@@ -109,40 +99,15 @@ ensure lc_keyclone</pre>
 <article data-page="config" data-crumb="LC Keyclone">
 <h1>Config</h1>
 <p>Everything is in <code>config.lua</code> in the resource folder. It is only loaded on the server. Restart the resource after changing it.</p>
+<p>The laptop itself (its item, desktop, wrong codes allowed and how many devices <code>scan</code> lists) is set up in <a href="#~/lc_hack/config/laptop">LC Hack's config</a>.</p>
 
 <h2>range</h2>
 <ul><li>range: <code>number</code>
     <ul><li>How far away (meters) a vehicle or reader can be found with <code>scan</code>, and how close it must stay to connect and to get the reward. Defaults to <code>15.0</code>.</li></ul></li></ul>
 
-<h2>maxTargets</h2>
-<ul><li>maxTargets: <code>number</code>
-    <ul><li>Most targets <code>scan</code> lists, closest first. Defaults to <code>8</code>.</li></ul></li></ul>
-
 <h2>cooldown</h2>
 <ul><li>cooldown: <code>number</code>
     <ul><li>Seconds before the same vehicle or reader can be cloned again. It shows as <code>locked</code> meanwhile. Defaults to <code>900</code>.</li></ul></li></ul>
-
-<h2>attempts</h2>
-<ul><li>attempts: <code>number</code>
-    <ul><li>Wrong passwords and codes allowed in one session. The device closes when they run out. Defaults to <code>4</code>.</li></ul></li></ul>
-
-<h2>desktop</h2>
-<ul><li>desktop: <code>string</code> or <code>false</code>
-    <ul><li>The device's desktop, one of LC Hack's <a href="#~/lc_hack/guides/desktops">desktops</a>, or <code>false</code> for a terminal only. Defaults to <code>'kali'</code>.</li></ul></li></ul>
-
-<h2>item</h2>
-<ul><li>item: <code>string</code>
-    <ul><li>The ox_inventory item that opens the device. Point its <code>server.export</code> to <code>lc_keyclone.useCloner</code>. Defaults to <code>'key_cloner'</code>.</li></ul></li></ul>
-
-<h2>command</h2>
-<ul><li>command: <code>table</code> or <code>false</code>
-    <ul><li>A command that opens the device when ox_inventory isn't started. <code>false</code> for none.</li></ul>
-    <ul>
-        <li>name: <code>string</code>
-            <ul><li>Defaults to <code>'keycloner'</code>.</li></ul></li>
-        <li>restricted?: <code>string</code> or <code>false</code>
-            <ul><li>An ace the player needs, e.g. <code>'group.admin'</code>. <code>false</code> for everyone.</li></ul></li>
-    </ul></li></ul>
 
 <h2>vehicles</h2>
 <ul><li>vehicles: <code>table</code>
@@ -181,24 +146,6 @@ ensure lc_keyclone</pre>
         -- Alert the owner, give XP, ...
     end
 end,</pre>
-</article>
-
-<!-- =====================================================================
-     Functions / Server
-     ===================================================================== -->
-<article data-page="functions/server" data-crumb="LC Keyclone / Functions">
-<h1>Server</h1>
-
-<h2>openCloner</h2>
-<p>Opens the key cloner for a player, e.g. from your own item, job or command.</p>
-<pre data-lang="lua">exports.lc_keyclone:openCloner(source)</pre>
-<ul><li>source: <code>number</code></li></ul>
-<p>Return:</p>
-<ul><li><code>boolean</code> - Returns <code>false</code> if the player is already hacking.</li></ul>
-
-<h2>useCloner</h2>
-<p>The ox_inventory item export. Point the key cloner item's <code>server.export</code> to it; you don't call it yourself. It opens the device and keeps the item.</p>
-<pre data-lang="lua">server = { export = 'lc_keyclone.useCloner' },</pre>
 </article>
 
 <!-- =====================================================================
@@ -276,7 +223,7 @@ end,</pre>
 <p>In ox_doorlock, add <code>keycard_vault</code> to the door's items. Anyone with the item can then open it, like with ox_doorlock's other item doors.</p>
 
 <h3>Restart and test</h3>
-<p>Restart <code>lc_keyclone</code>, stand near the reader and run <code>scan</code> on the device.</p>
+<p>Restart <code>lc_keyclone</code>, stand near the reader and run <code>scan</code> on the laptop.</p>
 </div>
 </article>
 
@@ -285,18 +232,18 @@ end,</pre>
      ===================================================================== -->
 <article data-page="guides/playing" data-crumb="LC Keyclone / Guides">
 <h1>Playing</h1>
-<p>What the player does, from opening the device to the keys.</p>
+<p>What the player does, from opening the laptop to the keys.</p>
 
 <div class="steps">
-<h3>Open the device</h3>
-<p>Use the <code>key_cloner</code> item, or <code>/keycloner</code> without ox_inventory. <code>help</code> lists the new commands under "Tools".</p>
+<h3>Open the laptop</h3>
+<p>Use the <code>laptop</code> item, or <code>/laptop</code> without ox_inventory. <code>help</code> lists <code>scan</code> and <code>connect</code> under "Tools".</p>
 
 <h3>Scan</h3>
-<p><code>scan</code> lists parked vehicles and keycard readers nearby, closest first.</p>
-<pre data-lang="cfg">ID  TYPE     NAME                  STATUS
-1   vehicle  KEY-9732              available
-2   reader   Vault Door            available
-3   vehicle  KEY-41C0              locked</pre>
+<p><code>scan</code> lists every device nearby, closest first: parked vehicles, keycard readers, and whatever other resources add to the laptop, like phones from <a href="#~/lc_phonehack">LC Phonehack</a>.</p>
+<pre data-lang="cfg">ID  TYPE      DEVICE              SIGNAL    STATUS
+1   vehicle   KEY-9732            -38 dBm   available
+2   reader    Vault Door          -44 dBm   available
+3   vehicle   KEY-41C0            -55 dBm   locked</pre>
 <p><code>locked</code> targets were cloned a moment ago and can't be cloned yet.</p>
 
 <h3>Connect</h3>
@@ -306,7 +253,7 @@ end,</pre>
 <p>The code is somewhere in the files: a config, a log, a file in base64 (<code>base64 -d</code>) or inside a binary (<code>strings</code>). An old code is there too, and a wrong code costs an attempt.</p>
 
 <h3>Become root</h3>
-<p>Run <code>su</code> and type the code. A vehicle gives keys, a reader gives its keycard. The device stays open for the next one.</p>
+<p>Run <code>su</code> and type the code. A vehicle gives keys, a reader gives its keycard. The laptop stays open for the next one.</p>
 </div>
 </article>
 
@@ -315,13 +262,12 @@ end,</pre>
      ===================================================================== -->
 <article data-page="guides/how-it-works" data-crumb="LC Keyclone / Guides">
 <h1>How it Works</h1>
-<p>lc_keyclone is a hack type built on LC Hack's <a href="#~/lc_hack/guides/hacktype">building blocks</a>, like <a href="#~/lc_phonehack">LC Phonehack</a>.</p>
+<p>lc_keyclone adds two device types to LC Hack's laptop, like <a href="#~/lc_phonehack">LC Phonehack</a>. It has no device, item or terminal of its own, see <a href="#~/lc_hack/guides/hacktype">Creating a Hack Type</a>.</p>
 
-<h2>The device</h2>
-<p>The device is an LC Hack hack with <code>target = false</code>, so it stays open until the player closes it, and two <code>commands</code> that run on the server: <code>scan</code> and <code>connect</code>.</p>
-
-<h2>Targets</h2>
-<p><code>connect</code> adds the vehicle's key module or the reader with <a href="#~/lc_hack/functions/server/addmachine">addMachine</a>. Its user has no password, and its root password is the code hidden in its files. <code>onRoot</code> gives the keys or the keycard.</p>
+<h2>The device types</h2>
+<p>When it starts, lc_keyclone calls <a href="#~/lc_hack/functions/server/registerdevice">registerDevice</a> for <code>'vehicle'</code> (unless <code>vehicles.enabled</code> is <code>false</code>) and for <code>'reader'</code> (when <code>readers</code> has any). Their <code>scan</code> returns the parked vehicles or the readers near the player, and their <code>connect</code> returns the vehicle's key module or the reader as a machine, or why it can't connect.</p>
+<p>LC Hack gives the machine an IP and adds it to the hack. Its user has no password, and its root password is the code hidden in its files. <code>onRoot</code> gives the keys or the keycard.</p>
+<p>LC Hack forgets device types when it restarts, so lc_keyclone registers again on <code>onResourceStart</code> for <code>lc_hack</code>.</p>
 
 <h2>Security</h2>
 <p>Everything runs and is checked on the server; the client only shows the terminal.</p>
@@ -337,7 +283,7 @@ end,</pre>
 <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
 <tbody>
 <tr><td><code>config.lua</code></td><td>Everything you can change, including the readers.</td></tr>
-<tr><td><code>server/main.lua</code></td><td>The device, <code>scan</code>, <code>connect</code>, the checks and the rewards.</td></tr>
+<tr><td><code>server/main.lua</code></td><td>The device types: <code>scan</code>, <code>connect</code>, the checks and the rewards.</td></tr>
 <tr><td><code>server/keys.lua</code></td><td>Gives the keys with the key script the server uses.</td></tr>
 <tr><td><code>server/targets.lua</code></td><td>Target names, codes and the files they are hidden in. Plain Lua, so it can be tested on its own.</td></tr>
 </tbody></table></div>

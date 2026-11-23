@@ -41,6 +41,7 @@
 <ul>
     <li><a href="https://github.com/overextended/ox_lib" target="_blank" rel="noopener">ox_lib</a></li>
     <li><a href="https://github.com/overextended/ox_target" target="_blank" rel="noopener">ox_target</a> (optional, terminals use ox_lib points with <code>[E]</code> without it)</li>
+    <li><a href="https://github.com/overextended/ox_inventory" target="_blank" rel="noopener">ox_inventory</a> (optional, for the laptop item; <code>/laptop</code> opens it without)</li>
     <li>OneSync, the server checks the player's position when a terminal is used.</li>
 </ul>
 
@@ -55,6 +56,17 @@
 <pre data-lang="cfg">ensure ox_lib
 ensure ox_target
 ensure lc_hack</pre>
+
+<h3>Add the laptop</h3>
+<p>The laptop is the player's own machine. With ox_inventory, add it to <code>ox_inventory/data/items.lua</code>. <code>consume = 0</code> keeps it when it's used.</p>
+<pre data-lang="lua">['laptop'] = {
+    label = 'Laptop',
+    weight = 1500,
+    stack = false,
+    consume = 0,
+    server = { export = 'lc_hack.useLaptop' },
+},</pre>
+<p>Without ox_inventory, players open it with <code>/laptop</code>, see <a href="#/config/laptop">laptop</a>. Its <code>scan</code> finds the devices other resources add, like <a href="#~/lc_phonehack">LC Phonehack</a> and <a href="#~/lc_keyclone">LC Keyclone</a>.</p>
 
 <h3>Try it</h3>
 <p>Two test commands are included in <code>server/commands.lua</code>. Both require the <code>group.admin</code> ace.</p>
@@ -83,7 +95,10 @@ exports.lc_hack:createTerminal({
 })
 
 -- Or a hack started from your own code, e.g. an item
-exports.lc_hack:startHack(source, config, function(success) end)</pre>
+exports.lc_hack:startHack(source, config, function(success) end)
+
+-- Or your own devices on the player's laptop
+exports.lc_hack:registerDevice('atm', { scan = scan, connect = connect })</pre>
 <p>See <a href="#/guides/examples">Examples</a> for complete setups.</p>
 
 <h2>Next steps</h2>
@@ -92,7 +107,7 @@ exports.lc_hack:startHack(source, config, function(success) end)</pre>
     <li><a href="#/hackconfig">HackConfig</a>: every field a hack can have.</li>
     <li><a href="#/functions/server">Server functions</a>: terminals, hacks and minigames.</li>
     <li><a href="#/config">Config</a>: servers that are always on, DNS and websites.</li>
-    <li><a href="#/guides/hacktype">Creating a Hack Type</a>: your own kind of hack in a separate resource, like <a href="#~/lc_phonehack">LC Phonehack</a>.</li>
+    <li><a href="#/guides/hacktype">Creating a Hack Type</a>: your own devices on the player's laptop, in a separate resource, like <a href="#~/lc_phonehack">LC Phonehack</a> and <a href="#~/lc_keyclone">LC Keyclone</a>.</li>
 </ul>
 
 <h2>How it works</h2>
@@ -140,7 +155,16 @@ CreateThread(createTerminals)
 AddEventHandler('onResourceStart', function(resource)
     if resource == 'lc_hack' then createTerminals() end
 end)</pre>
-<p>The same goes for minigames registered with <code>registerGame</code>.</p>
+<p>The same goes for minigames registered with <code>registerGame</code> and device types registered with <code>registerDevice</code>.</p>
+
+<h2>scan on the laptop finds nothing</h2>
+<ul>
+    <li>LC Hack finds no devices itself: they come from resources that use <a href="#/functions/server/registerdevice">registerDevice</a>, like <a href="#~/lc_phonehack">LC Phonehack</a> and <a href="#~/lc_keyclone">LC Keyclone</a>. Check that they are started after lc_hack.</li>
+    <li>Each device type decides what is close enough. An error in its <code>scan</code> is printed in the server console as <code>[lc_hack] error in device type ...</code>.</li>
+</ul>
+
+<h2>/laptop doesn't exist</h2>
+<p>The command is only added when ox_inventory isn't started. With ox_inventory, players use the <code>laptop</code> item, see <a href="#/config/laptop">laptop</a>.</p>
 
 <h2>ssh or ping can't reach a machine</h2>
 <ul>
@@ -197,6 +221,14 @@ end)</pre>
 <p>Everything in it is optional. Hacks themselves are not configured here: they are created from your own resources with <a href="#/functions/server">exports</a> and a <a href="#/hackconfig">HackConfig</a>.</p>
 
 <pre data-lang="lua">return {
+    -- The player's own laptop (the "laptop" item)
+    laptop = {
+        command = { name = 'laptop', restricted = false },
+        desktop = 'kali',
+        attempts = 4,
+        maxDevices = 10,
+    },
+
     -- Servers that are always on: part of every hack, reachable from every machine
     servers = {
         {
@@ -216,6 +248,23 @@ end)</pre>
         ['www.northbank.com'] = '82.103.40.12',
     },
 }</pre>
+
+<h2>laptop</h2>
+<p>The player's own laptop: a hack without a target that stays open until the player closes it. <code>scan</code> lists the devices nearby and <code>connect &lt;ID&gt;</code> adds one to the hack. The devices come from other resources, see <a href="#/functions/server/registerdevice">registerDevice</a>.</p>
+<ul>
+    <li>laptop?: <code>table</code>
+        <ul>
+            <li>command?: <code>table</code> or <code>false</code>
+                <ul><li>A command that opens the laptop when ox_inventory isn't started, e.g. <code>{ name = 'laptop', restricted = false }</code>. <code>restricted</code> is an ace the player needs, or <code>false</code> for everyone. <code>false</code> for no command.</li></ul></li>
+            <li>desktop?: <code>string</code> or <code>false</code>
+                <ul><li>One of the <a href="#/guides/desktops">desktops</a>, or <code>false</code> for a terminal only. Defaults to <code>'kali'</code>.</li></ul></li>
+            <li>attempts?: <code>number</code>
+                <ul><li>Wrong passwords allowed before the laptop closes. Defaults to <code>4</code>.</li></ul></li>
+            <li>maxDevices?: <code>number</code>
+                <ul><li>Most devices <code>scan</code> lists, closest first. Defaults to <code>10</code>.</li></ul></li>
+        </ul></li>
+</ul>
+<p>With ox_inventory, the <code>laptop</code> item opens it: point the item's <code>server.export</code> to <code>lc_hack.useLaptop</code>, see <a href="#/index/installation">Installation</a>. <a href="#/functions/server/openlaptop">openLaptop</a> opens it from your own code.</p>
 
 <h2>servers</h2>
 <p>Servers that are always on. They are added to every hack, and every machine can reach them, like the internet, unless their own firewall blocks it. Players can <code>ssh</code> into them, and what they change on them is saved for everyone.</p>
@@ -546,6 +595,68 @@ end)</pre>
 <ul><li>source: <code>number</code></li></ul>
 <p>Return:</p>
 <ul><li><code>boolean</code> - Returns <code>true</code> if the player is hacking, otherwise <code>false</code>.</li></ul>
+
+<h2>registerDevice</h2>
+<p>Adds a device type to the player's <a href="#/config/laptop">laptop</a>. Its devices show up when the player runs <code>scan</code>, and <code>connect &lt;ID&gt;</code> asks it for the machine. LC Hack keeps the list, gives the machine an IP on the laptop's network and adds it to the hack. See <a href="#/guides/hacktype">Creating a Hack Type</a>.</p>
+<pre data-lang="lua">exports.lc_hack:registerDevice(name, data)</pre>
+<ul>
+    <li>name: <code>string</code>
+        <ul><li>Shown in the TYPE column of <code>scan</code>, e.g. <code>'phone'</code>. Using the same name again replaces it.</li></ul></li>
+    <li>data: <code>table</code>
+        <ul>
+            <li>scan: <code>function(source: number): table[]</code>
+                <ul><li>The devices of this type the player can find right now. Each one is a table:</li></ul>
+                <ul>
+                    <li>id: <code>any</code>
+                        <ul><li>Given back to <code>connect</code>, e.g. a network id.</li></ul></li>
+                    <li>name: <code>string</code>
+                        <ul><li>Shown by <code>scan</code>, and the machine's <code>host</code> unless <code>connect</code> sets one.</li></ul></li>
+                    <li>distance: <code>number</code>
+                        <ul><li>Meters from the player. <code>scan</code> lists the closest first and shows it as signal strength.</li></ul></li>
+                    <li>locked?: <code>boolean</code>
+                        <ul><li>Shown as <code>locked</code>, e.g. for a cooldown.</li></ul></li>
+                </ul></li>
+            <li>connect: <code>function(source: number, id: any): HackMachine | string</code>
+                <ul><li>The <a href="#/hackconfig/machine">machine</a> to add, without <code>ip</code>: LC Hack gives it one. Return a string instead to refuse, e.g. <code>'Phone-8c13 is out of range.'</code>; it is printed after <code>connect: </code>.</li></ul></li>
+        </ul>
+    </li>
+</ul>
+<p>Device types are removed when their resource stops. Register again on <code>onResourceStart</code> for <code>lc_hack</code>, since a restart of the core forgets them. Errors in <code>scan</code> and <code>connect</code> are caught and printed in the server console.</p>
+<p><strong>Example</strong></p>
+<pre data-lang="lua">local function register()
+    exports.lc_hack:registerDevice('phone', {
+        scan = function(source)
+            return { { id = 12, name = 'Phone-8c13', distance = 4.2 } }
+        end,
+        connect = function(source, id)
+            return {
+                user = 'mobile',
+                rootPassword = '4821',
+                files = { ['~/Notes/reminders.txt'] = 'New phone PIN: 4821' },
+                onRoot = function(player)
+                    exports.ox_inventory:AddItem(player, 'phone_data', 1)
+                end,
+            }
+        end,
+    })
+end
+
+register()
+
+AddEventHandler('onResourceStart', function(resource)
+    if resource == 'lc_hack' then register() end
+end)</pre>
+
+<h2>openLaptop</h2>
+<p>Opens the player's <a href="#/config/laptop">laptop</a>, e.g. from your own item, job or command.</p>
+<pre data-lang="lua">exports.lc_hack:openLaptop(source)</pre>
+<ul><li>source: <code>number</code></li></ul>
+<p>Return:</p>
+<ul><li>opened: <code>boolean</code> - <code>false</code> if the player is already hacking or in a minigame.</li></ul>
+
+<h2>useLaptop</h2>
+<p>The ox_inventory item export. Point the laptop item's <code>server.export</code> to it; you don't call it yourself. It opens the laptop and keeps the item.</p>
+<pre data-lang="lua">server = { export = 'lc_hack.useLaptop' },</pre>
 
 <h2>registerGame</h2>
 <p>Registers a minigame with the core. Minigame resources call this once when they start and ship their own UI. The <code>check</code> function runs on the server for every guess, so the answer never has to leave the server. See <a href="#/guides/examples/your-own-minigame">Your own minigame</a>.</p>
@@ -889,47 +1000,42 @@ echo "&lt;h1&gt;My blog&lt;/h1&gt;" &gt; /var/www/html/blog/index.html</pre>
      ===================================================================== -->
 <article data-page="guides/hacktype" data-crumb="LC Hack / Guides" hidden>
 <h1>Creating a Hack Type</h1>
-<p>lc_hack is the core: the terminal, the desktops, machines, files and the server-side checks. Hack types are separate resources that build on it, e.g. hacking an ATM or the phones of people nearby. This guide shows the three building blocks, using <a href="#~/lc_phonehack">LC Phonehack</a> as the example.</p>
+<p>lc_hack is the core: the terminal, the desktops, machines, files, the server-side checks and the player's own <a href="#/config/laptop">laptop</a>. Hack types are separate resources that build on it, e.g. hacking an ATM or the phones of people nearby. The easiest kind adds a device type to the laptop. This guide uses <a href="#~/lc_phonehack">LC Phonehack</a> as the example.</p>
 
 <div class="table"><table>
 <thead><tr><th>Building block</th><th>What it does</th></tr></thead>
 <tbody>
-<tr><td><a href="#/hackconfig/game"><code>commands</code></a></td><td>Your own terminal commands. They run on the server, in your resource.</td></tr>
-<tr><td><a href="#/functions/server/addmachine"><code>addMachine</code></a></td><td>Adds a machine to a running hack, e.g. a device a command found.</td></tr>
+<tr><td><a href="#/functions/server/registerdevice"><code>registerDevice</code></a></td><td>Adds your devices to the laptop's <code>scan</code>, and gives <code>connect</code> the machine to add.</td></tr>
 <tr><td><a href="#/hackconfig/machine"><code>onRoot</code></a></td><td>Called on the server when the player gets root on a machine. Give the reward here.</td></tr>
-<tr><td><a href="#/functions/server/createterminal"><code>canUse</code></a></td><td>Decides if a player may use a terminal, e.g. an item or a cooldown. <a href="#~/lc_datahack">LC Datahack</a> uses it.</td></tr>
+<tr><td><a href="#/functions/server/createterminal"><code>canUse</code></a></td><td>Decides if a player may use a terminal in the world, e.g. an item or a cooldown. <a href="#~/lc_datahack">LC Datahack</a> uses it.</td></tr>
+<tr><td><a href="#/hackconfig/game"><code>commands</code></a> and <a href="#/functions/server/addmachine"><code>addMachine</code></a></td><td>Your own terminal commands and machines in your own hack, see <a href="#/guides/hacktype/your-own-hack">Your own hack</a>.</td></tr>
 </tbody></table></div>
-<p>Add <code>target = false</code> for a hack without a goal: it stays open until the player closes it, so they can hack one device after the other.</p>
 
 <div class="steps">
-<h3>Open a hack with your own commands</h3>
-<p>Start a hack from your resource, e.g. when a player uses an item. Every function in <code>commands</code> becomes a command in the terminal, with Tab completion and a line in <code>help</code>.</p>
-<pre data-lang="lua">exports.lc_hack:startHack(source, {
-    ip = '172.20.0.1',
-    host = 'laptop',
-    user = 'user',
-    desktop = 'kali',
-    target = false,
-    commands = {
-        scan = function(source, args)
-            return { 'ID  DEVICE', '1   Phone-8c13' }
-        end,
-    },
+<h3>Find devices with scan</h3>
+<p>Register a device type when your resource starts. LC Hack calls its <code>scan</code> when the player runs <code>scan</code> on the laptop, and lists your devices together with every other type, closest first.</p>
+<pre data-lang="lua">exports.lc_hack:registerDevice('phone', {
+    scan = function(source)
+        local found = {}
+        -- Look up what is near the player, on the server
+        found[#found + 1] = { id = netId, name = 'Phone-8c13', distance = 4.2, locked = false }
+        return found
+    end,
+    connect = connect,
 })</pre>
-<p>A command gets the player and the words after it, and returns the lines to print: a table of strings, one string or nothing. Errors in it are caught and printed in the server console.</p>
+<p><code>id</code> is yours: LC Hack gives it back to <code>connect</code>. <code>locked</code> shows the device as locked, e.g. for a cooldown.</p>
 
-<h3>Add machines while the player hacks</h3>
-<p>Create a machine when the player finds something. It takes the same fields as a <a href="#/hackconfig/machine">machine</a> in a HackConfig, and its passwords stay on the server.</p>
-<pre data-lang="lua">connect = function(source, args)
-    exports.lc_hack:addMachine(source, {
-        ip = '172.20.0.2', -- On the laptop's network, so the player can ssh to it
-        host = 'Phone-8c13',
-        user = 'mobile',
+<h3>Return the machine from connect</h3>
+<p>When the player runs <code>connect &lt;ID&gt;</code>, LC Hack calls your <code>connect</code> with the device's <code>id</code>. Return a <a href="#/hackconfig/machine">machine</a> without <code>ip</code>: LC Hack gives it an IP on the laptop's network, adds it to the hack and tells the player how to log in. Its passwords stay on the server. Return a string to refuse instead.</p>
+<pre data-lang="lua">local function connect(source, netId)
+    if not nearbyNpc(source, netId) then return 'Phone-8c13 is out of range.' end
+    return {
+        user = 'mobile', -- No password: connect is the way in
         rootPassword = '4821',
         files = { ['~/Notes/reminders.txt'] = 'New phone PIN: 4821' },
-    })
-    return 'Connected. Log in with: ssh mobile@172.20.0.2'
-end,</pre>
+        onRoot = onRoot,
+    }
+end</pre>
 
 <h3>Reward the player</h3>
 <p><code>onRoot</code> runs on the server when the player becomes root on the machine with the right password. Check what you need again before you give anything: the player may have walked away.</p>
@@ -937,19 +1043,47 @@ end,</pre>
     exports.ox_inventory:AddItem(source, 'phone_data', 1)
 end,</pre>
 
+<h3>Register again when lc_hack restarts</h3>
+<p>Device types live in lc_hack, so a restart of the core forgets them. Register them in a function, and call it again on <code>onResourceStart</code>:</p>
+<pre data-lang="lua">local function register()
+    exports.lc_hack:registerDevice('phone', { scan = scan, connect = connect })
+end
+
+register()
+
+AddEventHandler('onResourceStart', function(resource)
+    if resource == 'lc_hack' then register() end
+end)</pre>
+
 <h3>Validate everything on the server</h3>
 <ul>
-    <li>Arguments come from the player. Check them: <code>tonumber(args[1])</code>, ranges, cooldowns.</li>
-    <li>Check the world on the server: does the NPC still exist, is the player close to it?</li>
+    <li>Check the world on the server in <code>connect</code> and again in <code>onRoot</code>: does the NPC still exist, is the player close to it, is it on cooldown?</li>
     <li>Give rewards in <code>onRoot</code> or <a href="#/events">callbacks</a>, never because the client said so.</li>
 </ul>
 </div>
 
-<h2>lc_phonehack</h2>
-<p>A complete hack type in two small files. The player opens a laptop, <code>scan</code> lists the phones of NPCs nearby, <code>connect</code> adds one as a machine, and the player finds the phone's PIN in its files and uses it with <code>su</code>.</p>
+<h2>Your own hack</h2>
+<p>For a hack that isn't on the laptop, start your own with <a href="#/functions/server/starthack">startHack</a>. Every function in <code>commands</code> becomes a command in the terminal, with Tab completion and a line in <code>help</code>. A command gets the player and the words after it, and returns the lines to print: a table of strings, one string or nothing. <a href="#/functions/server/addmachine">addMachine</a> adds machines while the player hacks. Add <code>target = false</code> for a hack without a goal: it stays open until the player closes it.</p>
+<pre data-lang="lua">exports.lc_hack:startHack(source, {
+    ip = '10.9.0.1',
+    host = 'heist-rig',
+    user = 'user',
+    desktop = 'kali',
+    target = false,
+    commands = {
+        crack = function(source, args)
+            exports.lc_hack:addMachine(source, { ip = '10.9.0.2', host = 'vault', user = 'guard', rootPassword = 'Vault-77' })
+            return 'Found the vault at 10.9.0.2'
+        end,
+    },
+})</pre>
+<p>Arguments come from the player. Check them on the server: <code>tonumber(args[1])</code>, ranges, cooldowns.</p>
+
+<h2>Examples</h2>
 <ul>
-    <li>Source and setup: <a href="#~/lc_phonehack">LC Phonehack documentation</a> and <a href="https://github.com/LAURIDS0/lc_phonehack" target="_blank" rel="noopener">GitHub</a></li>
-    <li>Works with ox_inventory (an item opens the laptop and the reward is an item) and without it (a command and a callback).</li>
+    <li><a href="#~/lc_phonehack">LC Phonehack</a>: one device type, the phones of NPCs nearby (<a href="https://github.com/LAURIDS0/lc_phonehack" target="_blank" rel="noopener">GitHub</a>).</li>
+    <li><a href="#~/lc_keyclone">LC Keyclone</a>: two device types, parked vehicles and keycard readers (<a href="https://github.com/LAURIDS0/lc_keyclone" target="_blank" rel="noopener">GitHub</a>).</li>
+    <li><a href="#~/lc_datahack">LC Datahack</a> and <a href="#~/lc_cctv">LC CCTV</a>: terminals in the world with a network behind them, built with <a href="#/functions/server/createterminal">createTerminal</a>.</li>
 </ul>
 </article>
 
@@ -961,17 +1095,17 @@ end,</pre>
 <p>Complete setups you can copy into your own resource.</p>
 
 <h2>Hack from an item</h2>
-<p>Start a hack when a player uses an item. The item calls a server export in your resource. <code>consume = 0</code> and returning <code>false</code> keep the item.</p>
+<p>Start a hack when a player uses an item. The item calls a server export in your resource. <code>consume = 0</code> and returning <code>false</code> keep the item. For devices on the player's own laptop, use <a href="#/functions/server/registerdevice">registerDevice</a> instead.</p>
 <pre data-lang="lua">-- ox_inventory/data/items.lua
-['hacking_laptop'] = {
-    label = 'Hacking Laptop',
-    weight = 1500,
+['heist_usb'] = {
+    label = 'Heist USB',
+    weight = 20,
     stack = false,
     consume = 0,
-    server = { export = 'my_heist.useLaptop' },
+    server = { export = 'my_heist.useUsb' },
 },</pre>
 <pre data-lang="lua">-- my_heist/server.lua
-exports('useLaptop', function(event, item, inventory)
+exports('useUsb', function(event, item, inventory)
     if event ~= 'usingItem' then return end
     local source = inventory.id
 
