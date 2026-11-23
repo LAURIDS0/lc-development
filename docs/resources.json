@@ -20,6 +20,36 @@
         "updated": "November 23, 2026"
     },
     {
+        "id": "lc_jobgarages",
+        "name": "LC Job Garages",
+        "icon": "fa-solid fa-truck-medical",
+        "description": "Job garages for Qbox with fully set up job vehicles, grade limits, starter items and a config generator.",
+        "github": "https://github.com/LAURIDS0/lc_jobgarages",
+        "image": "../images/lc_jobgarages.png",
+        "status": "released",
+        "updated": "August 21, 2026"
+    },
+    {
+        "id": "lc_garages",
+        "name": "LC Garages",
+        "icon": "fa-solid fa-warehouse",
+        "description": "Public, job and personal garages for Qbox, checked against the player's own vehicles.",
+        "github": "https://github.com/LAURIDS0/lc_garages",
+        "image": "../images/lc_garages.png",
+        "status": "released",
+        "updated": "August 21, 2026"
+    },
+    {
+        "id": "lc_els",
+        "name": "LC Els",
+        "icon": "fa-solid fa-car-on",
+        "description": "A standalone emergency lighting system with lights, sirens and an air horn, synced for everyone.",
+        "github": "https://github.com/LAURIDS0/lc_els",
+        "image": "../images/lc_els.png",
+        "status": "released",
+        "updated": "August 22, 2026"
+    },
+    {
         "id": "lc_keyclone",
         "name": "LC Keyclone",
         "icon": "fa-solid fa-key",

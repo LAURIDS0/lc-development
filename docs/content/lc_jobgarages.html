@@ -1,0 +1,483 @@
+<!-- Sidebar: data-page is the article's id, data-folder groups pages -->
+<nav data-nav>
+    <a data-page="index">Overview</a>
+    <a data-page="issues">Common Issues</a>
+    <a data-page="config">Config</a>
+    <a data-page="garage">Garage</a>
+    <a data-page="vehicle">Vehicle</a>
+    <div data-folder="Guides">
+        <a data-page="guides/new-garage">Adding a Garage</a>
+        <a data-page="guides/new-vehicle">Adding a Vehicle</a>
+        <a data-page="guides/mods">Mod Slots</a>
+    </div>
+    <a data-page="commands">Commands</a>
+</nav>
+
+<!-- =====================================================================
+     Overview
+     ===================================================================== -->
+<article data-page="index">
+<h1>LC Job Garages</h1>
+<div class="buttons">
+    <a class="button" href="https://github.com/LAURIDS0/lc_jobgarages" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Repository</a>
+    <a class="button" href="https://github.com/LAURIDS0/lc_jobgarages/archive/refs/heads/main.zip"><i class="fa-solid fa-download"></i>Download</a>
+</div>
+<p>Job garages for Qbox. Police, EMS and other jobs take out fully set up job vehicles: liveries, extras, mods, plates and starter items in the glovebox and trunk, limited by job grade. A command writes a vehicle's config for you from the vehicle you sit in.</p>
+<img class="shot" src="../images/lc_jobgarages.png" alt="LC Job Garages" loading="lazy">
+
+<h2>Installation</h2>
+<div class="steps">
+<h3>Install all resource dependencies</h3>
+<ul>
+    <li><a href="https://github.com/Qbox-project/qbx_core" target="_blank" rel="noopener">qbx_core</a></li>
+    <li><a href="https://github.com/Qbox-project/qbx_vehiclekeys" target="_blank" rel="noopener">qbx_vehiclekeys</a></li>
+    <li><a href="https://github.com/overextended/ox_lib" target="_blank" rel="noopener">ox_lib</a></li>
+    <li><a href="https://github.com/overextended/ox_inventory" target="_blank" rel="noopener">ox_inventory</a></li>
+    <li><a href="https://github.com/overextended/oxmysql" target="_blank" rel="noopener">oxmysql</a></li>
+</ul>
+
+<h3>Download the resource</h3>
+<ul>
+    <li>Download the <a href="https://github.com/LAURIDS0/lc_jobgarages/archive/refs/heads/main.zip">latest version</a> and unzip it as <code>lc_jobgarages</code>.</li>
+    <li>Or clone the repository: <code>git clone https://github.com/LAURIDS0/lc_jobgarages.git</code></li>
+</ul>
+
+<h3>Start the resource</h3>
+<pre data-lang="cfg">ensure ox_lib
+ensure oxmysql
+ensure qbx_core
+ensure qbx_vehiclekeys
+ensure ox_inventory
+ensure lc_jobgarages</pre>
+
+<h3>Set up your garages and vehicles</h3>
+<p>The included garages use addon vehicles (e.g. <code>tstudio_*</code>) that you may not have. Change them to your own, see <a href="#/guides/new-garage">Adding a Garage</a> and <a href="#/guides/new-vehicle">Adding a Vehicle</a>.</p>
+</div>
+
+<h2>Usage</h2>
+<p>Players with the job walk into the garage zone and press <code>E</code>:</p>
+<ul>
+    <li><strong>On foot</strong>: a menu lists the vehicles their grade may use. The vehicle spawns at the first free spawn point with keys, and the player is put in the driver seat.</li>
+    <li><strong>In a job vehicle</strong> (as the driver): the vehicle is returned and removed.</li>
+</ul>
+
+<h2>Next steps</h2>
+<ul>
+    <li><a href="#/guides/new-vehicle">Adding a Vehicle</a>: from a vehicle in game to a config with <code>/creategaragecar</code>.</li>
+    <li><a href="#/vehicle">Vehicle</a>: every field a vehicle can have.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Common Issues
+     ===================================================================== -->
+<article data-page="issues" data-crumb="LC Job Garages">
+<h1>Common Issues</h1>
+<p>Problems that come up when setting up job garages, and how to solve them.</p>
+
+<h2>A garage has no vehicles in the menu</h2>
+<ul>
+    <li>The folder with the vehicle files must be listed in <code>shared_scripts</code> in <code>fxmanifest.lua</code>, see <a href="#/guides/new-garage">Adding a Garage</a>.</li>
+    <li>The garage name in the vehicle files (<code>Config.JobVehicles['police_ls']</code>) must match the garage's key in <code>Config.JobGarages</code> exactly.</li>
+    <li>Vehicles with <a href="#/vehicle/access"><code>access</code></a> are hidden from grades outside <code>minGrade</code> and <code>maxGrade</code>.</li>
+</ul>
+
+<h2>A vehicle doesn't spawn</h2>
+<ul>
+    <li>Every spawn point has a vehicle within <code>2.5</code> meters. Move them or add more <a href="#/garage/spawnpoints">spawn points</a>.</li>
+    <li>The vehicle's <a href="#/vehicle/model"><code>model</code></a> must be a spawn code that exists on the server (its resource must be started).</li>
+</ul>
+
+<h2>Mods, liveries or extras look wrong</h2>
+<p>Mod values are different on every addon vehicle. Generate the config with <a href="#/commands/creategaragecar"><code>/creategaragecar</code></a> on the exact vehicle instead of copying values from another one.</p>
+
+<h2>The glovebox or trunk is empty</h2>
+<ul>
+    <li>Every item <code>name</code> must exist in ox_inventory. The server console prints <code>[lc_garages] ... success=false</code> for items that fail.</li>
+    <li>The inventories are found by the vehicle's plate. A vehicle without a plate gets no items.</li>
+</ul>
+
+<h2>The zones are drawn in the world</h2>
+<p><code>Config.Debug</code> is <code>true</code> in the default config. Set it to <code>false</code> in <code>config/config.lua</code>.</p>
+</article>
+
+<!-- =====================================================================
+     Config
+     ===================================================================== -->
+<article data-page="config" data-crumb="LC Job Garages">
+<h1>Config</h1>
+<p>The configuration is split in two levels: the garages, and one folder of vehicle files per garage. Restart the resource after changing anything.</p>
+<pre data-lang="cfg">config/
+    config.lua          # Debug
+    jobgarages.lua      # every garage: Config.JobGarages
+    police_ls/          # the vehicles of the garage "police_ls"
+        tstudio_polcypher.lua
+        ...
+    ems_sandy/
+        ...</pre>
+
+<h2>Debug</h2>
+<ul><li>Config.Debug: <code>boolean</code>
+    <ul><li>Draws the garage box zones in the world, to place them. Defaults to <code>true</code>; set it to <code>false</code> on a live server.</li></ul></li></ul>
+
+<h2>Load order</h2>
+<p><code>fxmanifest.lua</code> loads the files in this order, and it matters: <code>config.lua</code> creates the tables, the vehicle folders fill <code>Config.JobVehicles</code>, and <code>jobgarages.lua</code> fills <code>Config.JobGarages</code>.</p>
+<pre data-lang="lua">shared_scripts {
+    '@ox_lib/init.lua',
+    'config/config.lua',
+    'config/police_ls/*.lua',
+    'config/ems_sandy/*.lua',
+    -- one line per garage folder
+    'config/jobgarages.lua'
+}</pre>
+<div class="callout warning"><i class="fa-solid fa-triangle-exclamation"></i><div><p>A new garage folder must be added to <code>shared_scripts</code>, or its vehicles are never loaded.</p></div></div>
+</article>
+
+<!-- =====================================================================
+     Garage
+     ===================================================================== -->
+<article data-page="garage" data-crumb="LC Job Garages">
+<h1>Garage</h1>
+<p>Every garage is an entry in <code>Config.JobGarages</code> in <code>config/jobgarages.lua</code>. It says where the garage is, who can use it and where vehicles spawn; the vehicles themselves are in the garage's <a href="#/vehicle">vehicle files</a>.</p>
+<pre data-lang="lua">Config.JobGarages = {
+    ['police_ls'] = {
+        label = 'Los Santos Police Garage',
+        jobs = {
+            police = 0
+        },
+        blip = {
+            enabled = true,
+            sprite = 357,
+            color = 38,
+        },
+        zone = {
+            coords = vec3(432.95, -974.71, 21.95),
+            size = vec3(31.0, 17.0, 3.0),
+            rotation = 90.0
+        },
+        spawnPoints = {
+            vec4(438.21, -988.45, 20.1, 89.73),
+            vec4(438.10, -985.48, 20.1, 88.58),
+        }
+    },
+}</pre>
+
+<h2>label</h2>
+<ul><li>label: <code>string</code>
+    <ul><li>The name shown on the <code>[E]</code> text, the blip and the menu.</li></ul></li></ul>
+
+<h2>jobs</h2>
+<ul><li>jobs: <code>table&lt;string, number&gt;</code>
+    <ul><li>The jobs that can use the garage and the minimum grade for each.</li></ul></li></ul>
+<pre data-lang="lua">jobs = {
+    police = 0, -- every police grade
+    bcso = 2    -- bcso grade 2 and up
+},</pre>
+
+<h2>blip</h2>
+<ul><li>blip?: <code>table</code>
+    <ul><li>The garage's map blip. No blip without it.</li></ul>
+    <ul>
+        <li>enabled: <code>boolean</code>
+            <ul><li>Show the blip.</li></ul></li>
+        <li>sprite?: <code>number</code>
+            <ul><li>The <a href="https://docs.fivem.net/docs/game-references/blips/" target="_blank" rel="noopener">blip sprite</a>. Defaults to <code>357</code>.</li></ul></li>
+        <li>color?: <code>number</code>
+            <ul><li>Defaults to <code>0</code>.</li></ul></li>
+        <li>scale?: <code>number</code>
+            <ul><li>Defaults to <code>0.8</code>.</li></ul></li>
+        <li>shortRange?: <code>boolean</code>
+            <ul><li>Only show the blip on the minimap when close. Defaults to <code>true</code>.</li></ul></li>
+    </ul></li></ul>
+
+<h2>zone</h2>
+<ul><li>zone: <code>table</code>
+    <ul><li>The ox_lib box zone players press <code>E</code> in. Turn on <a href="#/config/debug"><code>Config.Debug</code></a> to see it.</li></ul>
+    <ul>
+        <li>coords: <code>vector3</code>
+            <ul><li>The center of the box.</li></ul></li>
+        <li>size: <code>vector3</code>
+            <ul><li>Width, length and height.</li></ul></li>
+        <li>rotation: <code>number</code>
+            <ul><li>The box's heading in degrees.</li></ul></li>
+    </ul></li></ul>
+
+<h2>spawnPoints</h2>
+<ul><li>spawnPoints: <code>vector4[]</code>
+    <ul><li>Where vehicles spawn: <code>vec4(x, y, z, heading)</code>. The first point without a vehicle within <code>2.5</code> meters is used, in order. When all are taken, nothing spawns.</li></ul></li></ul>
+</article>
+
+<!-- =====================================================================
+     Vehicle
+     ===================================================================== -->
+<article data-page="vehicle" data-crumb="LC Job Garages">
+<h1>Vehicle</h1>
+<p>Every vehicle is a file in its garage's folder, e.g. <code>config/police_ls/tstudio_polcypher.lua</code>. Only <code>label</code> and <code>model</code> are required; generate the rest with <a href="#/commands/creategaragecar"><code>/creategaragecar</code></a>.</p>
+<pre data-lang="lua">Config.JobVehicles['police_ls'] = Config.JobVehicles['police_ls'] or {}
+
+Config.JobVehicles['police_ls']['tstudio_polcypher'] = {
+    label = 'Commissioner Cypher',
+    model = 'tstudio_polcypher',
+}</pre>
+<p>The first line is the same in every file of the garage. <code>'police_ls'</code> must match the garage's key in <code>Config.JobGarages</code>.</p>
+
+<h2>label</h2>
+<ul><li>label: <code>string</code>
+    <ul><li>The name shown in the vehicle menu.</li></ul></li></ul>
+
+<h2>model</h2>
+<ul><li>model: <code>string</code>
+    <ul><li>The vehicle's spawn code.</li></ul></li></ul>
+
+<h2>access</h2>
+<ul><li>access?: <code>table</code>
+    <ul><li>Which grades can take out the vehicle. Without it, every grade that can use the garage can.</li></ul>
+    <ul>
+        <li>minGrade?: <code>number</code>
+            <ul><li>The lowest grade allowed.</li></ul></li>
+        <li>maxGrade?: <code>number</code>
+            <ul><li>The highest grade allowed.</li></ul></li>
+    </ul></li></ul>
+<pre data-lang="lua">access = {
+    minGrade = 2,
+    maxGrade = 4 -- grades 2, 3 and 4
+},</pre>
+
+<h2>plate</h2>
+<ul><li>plate?: <code>table</code>
+    <ul><li>The plate text. Without it, a random plate is used.</li></ul>
+    <ul>
+        <li>type: <code>'job'</code> or <code>'random'</code>
+            <ul><li><code>'job'</code>: the prefix and a random number, e.g. <code>POLICE27</code>. <code>'random'</code>: a random plate.</li></ul></li>
+        <li>prefix?: <code>string</code>
+            <ul><li>Required for <code>type = 'job'</code>.</li></ul></li>
+    </ul></li></ul>
+<pre data-lang="lua">plate = {
+    type = 'job',
+    prefix = 'POLICE'
+},</pre>
+
+<h2>appearance</h2>
+<ul><li>appearance?: <code>table</code>
+    <ul><li>How the vehicle looks. Every field is optional.</li></ul>
+    <ul>
+        <li>colors?: <code>table</code>
+            <ul><li><code>primary</code>, <code>secondary</code>, <code>pearlescent</code> and <code>wheel</code> color IDs.</li></ul></li>
+        <li>plateIndex?: <code>number</code>
+            <ul><li>The plate style, not its text.</li></ul></li>
+        <li>livery?: <code>table</code>
+            <ul><li><code>enabled</code> and <code>index</code>. Works with normal liveries and with vehicles that have their livery in mod slot <code>48</code>.</li></ul></li>
+        <li>extras?: <code>table&lt;number, boolean&gt;</code>
+            <ul><li><code>[1] = true</code> turns extra 1 on, <code>false</code> off. Only extras the vehicle has are changed.</li></ul></li>
+        <li>windowTint?: <code>number</code></li>
+        <li>wheels?: <code>table</code>
+            <ul><li><code>type</code> and <code>color</code>.</li></ul></li>
+    </ul></li></ul>
+<pre data-lang="lua">appearance = {
+    colors = { primary = 0, secondary = 0, pearlescent = 0, wheel = 0 },
+    plateIndex = 4,
+    livery = { enabled = true, index = 0 },
+    extras = { [1] = true, [2] = true, [3] = false },
+    windowTint = 4,
+    wheels = { type = 7, color = 0 }
+},</pre>
+
+<h2>lights</h2>
+<ul><li>lights?: <code>table</code>
+    <ul>
+        <li>xenon?: <code>table</code>
+            <ul><li><code>enabled</code> and <code>color</code> (a xenon color ID).</li></ul></li>
+        <li>neon?: <code>table</code>
+            <ul><li><code>enabled</code>, <code>color = { r, g, b }</code> (0-255) and <code>sides = { left, right, front, back }</code>.</li></ul></li>
+    </ul></li></ul>
+<pre data-lang="lua">lights = {
+    xenon = { enabled = true, color = 255 },
+    neon = {
+        enabled = true,
+        color = { r = 0, g = 80, b = 255 },
+        sides = { left = true, right = true, front = false, back = false }
+    }
+},</pre>
+
+<h2>performance</h2>
+<ul><li>performance?: <code>table</code>
+    <ul><li><code>engine</code>, <code>brakes</code>, <code>transmission</code>, <code>suspension</code> and <code>armor</code> are mod indexes (<code>-1</code> = stock). <code>turbo</code> is a <code>boolean</code>.</li></ul></li></ul>
+<pre data-lang="lua">performance = {
+    engine = 3,
+    brakes = 2,
+    transmission = 2,
+    suspension = 0,
+    armor = -1,
+    turbo = true
+},</pre>
+
+<h2>mods</h2>
+<ul><li>mods?: <code>table&lt;string, number&gt;</code>
+    <ul><li>Cosmetic mods by name, e.g. <code>roof = 0</code>. Only the mods listed are changed, and <code>-1</code> is stock. The values depend on the vehicle; see <a href="#/guides/mods">Mod Slots</a>.</li></ul></li></ul>
+<pre data-lang="lua">mods = {
+    roof = 0,      -- slot 10 | available: 0-6
+    frame = -1,
+    lightbar = 1
+},</pre>
+
+<h2>inventory</h2>
+<ul><li>inventory?: <code>table</code>
+    <ul><li>Items put in the vehicle when it spawns. Both inventories are emptied first. Every item name must exist in ox_inventory.</li></ul>
+    <ul>
+        <li>glovebox?: <code>{ name: string, count: number }[]</code></li>
+        <li>trunk?: <code>{ name: string, count: number }[]</code>
+            <ul><li>Leave it out for vehicles without a trunk, e.g. helicopters.</li></ul></li>
+    </ul></li></ul>
+<pre data-lang="lua">inventory = {
+    glovebox = {
+        { name = 'radio', count = 1 }
+    },
+    trunk = {
+        { name = 'medbag', count = 1 },
+        { name = 'kegle', count = 10 }
+    }
+},</pre>
+</article>
+
+<!-- =====================================================================
+     Guides / Adding a Garage
+     ===================================================================== -->
+<article data-page="guides/new-garage" data-crumb="LC Job Garages / Guides">
+<h1>Adding a Garage</h1>
+<p>A new job garage, e.g. for the fire department in Paleto Bay.</p>
+
+<div class="steps">
+<h3>Add the garage</h3>
+<p>Add it to <code>Config.JobGarages</code> in <code>config/jobgarages.lua</code>. The key (<code>'fire_paleto'</code>) is the garage's name.</p>
+<pre data-lang="lua">['fire_paleto'] = {
+    label = 'Paleto Fire Station',
+    jobs = {
+        fire = 0
+    },
+    zone = {
+        coords = vec3(-379.5, 6118.6, 31.5),
+        size = vec3(20.0, 14.0, 4.0),
+        rotation = 45.0
+    },
+    spawnPoints = {
+        vec4(-372.4, 6126.0, 31.4, 45.0),
+        vec4(-368.9, 6129.5, 31.4, 45.0),
+    }
+},</pre>
+
+<h3>Create its vehicle folder</h3>
+<p>Create <code>config/fire_paleto/</code>, with the same name as the garage, and add a <a href="#/guides/new-vehicle">vehicle</a> to it.</p>
+
+<h3>Load the folder</h3>
+<p>Add the folder to <code>shared_scripts</code> in <code>fxmanifest.lua</code>, before <code>config/jobgarages.lua</code>.</p>
+<pre data-lang="lua">'config/sheriff_sandy/*.lua',
+'config/fire_paleto/*.lua',
+
+'config/jobgarages.lua'</pre>
+
+<h3>Place the zone</h3>
+<p>Set <a href="#/config/debug"><code>Config.Debug = true</code></a>, restart the resource and adjust <code>zone</code> until the box covers the garage. Stand on each parking spot to get the <code>vec4</code> for <code>spawnPoints</code>.</p>
+</div>
+</article>
+
+<!-- =====================================================================
+     Guides / Adding a Vehicle
+     ===================================================================== -->
+<article data-page="guides/new-vehicle" data-crumb="LC Job Garages / Guides">
+<h1>Adding a Vehicle</h1>
+<p>The easiest way is to set the vehicle up in game and let <code>/creategaragecar</code> write the config.</p>
+
+<div class="steps">
+<h3>Set the vehicle up in game</h3>
+<p>Make sure the vehicle's resource is started, spawn it and set it up exactly as the job should get it: livery, extras, mods, tint and so on.</p>
+
+<h3>Generate the config</h3>
+<p>Sit in the vehicle and run <a href="#/commands/creategaragecar"><code>/creategaragecar</code></a>. Fill in the label, spawn code, minimum grade and plate prefix. The config is printed in the F8 console.</p>
+
+<h3>Create the vehicle file</h3>
+<p>Create a file in the garage's folder, e.g. <code>config/police_ls/tstudio_polcypher.lua</code>, with the registration lines, and paste the generated fields inside:</p>
+<pre data-lang="lua">Config.JobVehicles['police_ls'] = Config.JobVehicles['police_ls'] or {}
+
+Config.JobVehicles['police_ls']['tstudio_polcypher'] = {
+    label = 'Commissioner Cypher',
+    model = 'tstudio_polcypher',
+    -- the generated configuration...
+}</pre>
+<p>Don't wrap the generated fields in another <code>return { ... }</code>.</p>
+
+<h3>Add starter items</h3>
+<p>Add <a href="#/vehicle/inventory"><code>inventory</code></a> if the vehicle should come with items in the glovebox or trunk.</p>
+
+<h3>Restart and test</h3>
+<p>Restart <code>lc_jobgarages</code> and take the vehicle out of the garage.</p>
+</div>
+
+<h2>A minimal vehicle</h2>
+<p>A vehicle without anything special only needs a label and a model:</p>
+<pre data-lang="lua">Config.JobVehicles['police_ls'] = Config.JobVehicles['police_ls'] or {}
+
+Config.JobVehicles['police_ls']['tstudio_polscorcher'] = {
+    label = 'Police Bike',
+    model = 'tstudio_polscorcher'
+}</pre>
+</article>
+
+<!-- =====================================================================
+     Guides / Mod Slots
+     ===================================================================== -->
+<article data-page="guides/mods" data-crumb="LC Job Garages / Guides">
+<h1>Mod Slots</h1>
+<p><code>mods</code> uses readable names instead of GTA's mod slot numbers. Which values a slot has depends on the vehicle: <code>/creategaragecar</code> writes the range next to each mod, e.g. <code>roof = 0, -- slot 10 | available: 0-6</code>. <code>-1</code> is stock.</p>
+
+<div class="table"><table>
+<thead><tr><th>Slot</th><th>Name</th><th>Slot</th><th>Name</th></tr></thead>
+<tbody>
+<tr><td>0</td><td><code>spoiler</code></td><td>26</td><td><code>vanityPlate</code></td></tr>
+<tr><td>1</td><td><code>frontBumper</code></td><td>27</td><td><code>trimA</code></td></tr>
+<tr><td>2</td><td><code>rearBumper</code></td><td>28</td><td><code>ornaments</code></td></tr>
+<tr><td>3</td><td><code>sideSkirt</code></td><td>29</td><td><code>dashboard</code></td></tr>
+<tr><td>4</td><td><code>exhaust</code></td><td>30</td><td><code>dial</code></td></tr>
+<tr><td>5</td><td><code>frame</code></td><td>31</td><td><code>doorSpeaker</code></td></tr>
+<tr><td>6</td><td><code>grille</code></td><td>32</td><td><code>seats</code></td></tr>
+<tr><td>7</td><td><code>hood</code></td><td>33</td><td><code>steeringWheel</code></td></tr>
+<tr><td>8</td><td><code>fender</code></td><td>34</td><td><code>shifterLeavers</code></td></tr>
+<tr><td>9</td><td><code>rightFender</code></td><td>35</td><td><code>plaques</code></td></tr>
+<tr><td>10</td><td><code>roof</code></td><td>36</td><td><code>speakers</code></td></tr>
+<tr><td>11</td><td><code>engine</code></td><td>37</td><td><code>trunk</code></td></tr>
+<tr><td>12</td><td><code>brakes</code></td><td>38</td><td><code>hydraulics</code></td></tr>
+<tr><td>13</td><td><code>transmission</code></td><td>39</td><td><code>engineBlock</code></td></tr>
+<tr><td>14</td><td><code>horns</code></td><td>40</td><td><code>airFilter</code></td></tr>
+<tr><td>15</td><td><code>suspension</code></td><td>41</td><td><code>struts</code></td></tr>
+<tr><td>16</td><td><code>armor</code></td><td>42</td><td><code>archCover</code></td></tr>
+<tr><td>18</td><td><code>turbo</code></td><td>43</td><td><code>aerials</code></td></tr>
+<tr><td>23</td><td><code>frontWheels</code></td><td>44</td><td><code>trimB</code></td></tr>
+<tr><td>24</td><td><code>rearWheels</code></td><td>45</td><td><code>tank</code></td></tr>
+<tr><td>25</td><td><code>plateHolder</code></td><td>46</td><td><code>windows</code></td></tr>
+<tr><td></td><td></td><td>48</td><td><code>livery</code></td></tr>
+<tr><td></td><td></td><td>49</td><td><code>lightbar</code></td></tr>
+</tbody></table></div>
+
+<h2>Slots without a name</h2>
+<p>Addon vehicles can use other slots. <code>/creategaragecar</code> scans slots <code>0</code> to <code>49</code> and writes unknown ones as <code>mod&lt;slot&gt;</code>:</p>
+<pre data-lang="lua">mod17 = 0, -- slot 17 | available: 0-2</pre>
+
+<h2>Set them in the right place</h2>
+<p>Engine, brakes, transmission, suspension, armor and turbo belong in <a href="#/vehicle/performance"><code>performance</code></a>, the livery in <a href="#/vehicle/appearance"><code>appearance.livery</code></a>. Don't set them in <code>mods</code> as well.</p>
+</article>
+
+<!-- =====================================================================
+     Commands
+     ===================================================================== -->
+<article data-page="commands" data-crumb="LC Job Garages">
+<h1>Commands</h1>
+
+<h2>/creategaragecar</h2>
+<p>Writes the config for the vehicle you sit in: label, model, access, plate, appearance, lights, performance and every mod it finds, with the available values for each. It prints the config in the F8 console; it doesn't change any files or spawn anything.</p>
+<pre data-lang="cfg">/creategaragecar</pre>
+<ul>
+    <li>You must sit in a vehicle.</li>
+    <li>A dialog asks for the label, the spawn code, the minimum grade and the plate prefix.</li>
+    <li>Copy the output from F8 into a vehicle file, see <a href="#/guides/new-vehicle">Adding a Vehicle</a>.</li>
+</ul>
+<div class="callout"><i class="fa-solid fa-circle-info"></i><div><p>Every player can run it, but it only reads their own vehicle and prints to their own console.</p></div></div>
+</article>

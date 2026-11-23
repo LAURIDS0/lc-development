@@ -1,0 +1,172 @@
+<!-- Sidebar: data-page is the article's id, data-folder groups pages -->
+<nav data-nav>
+    <a data-page="index">Overview</a>
+    <a data-page="issues">Common Issues</a>
+    <a data-page="config">Config</a>
+    <a data-page="controls">Controls</a>
+    <a data-page="events">Events</a>
+</nav>
+
+<!-- =====================================================================
+     Overview
+     ===================================================================== -->
+<article data-page="index">
+<h1>LC Els</h1>
+<div class="buttons">
+    <a class="button" href="https://github.com/LAURIDS0/lc_els" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Repository</a>
+    <a class="button" href="https://github.com/LAURIDS0/lc_els/archive/refs/heads/main.zip"><i class="fa-solid fa-download"></i>Download</a>
+</div>
+<p>A standalone Emergency Lighting System. Emergency lights, sirens and an air horn for every emergency vehicle, synced to everyone nearby, without a framework or any per-vehicle setup.</p>
+<img class="shot" src="../images/lc_els.png" alt="LC Els" loading="lazy">
+
+<h2>Features</h2>
+<ul>
+    <li>Standalone: no framework and no dependencies.</li>
+    <li>Works with every vehicle in GTA's emergency class, including custom ones. No per-vehicle config.</li>
+    <li>Emergency lights, three sirens (wail, yelp, priority) and an air horn.</li>
+    <li>Sirens and horn are synced over the network, and the sound comes from the vehicle.</li>
+    <li>The lights stay on when the driver gets out; the siren and horn stop.</li>
+</ul>
+
+<h2>Installation</h2>
+<div class="steps">
+<h3>Download the resource</h3>
+<ul>
+    <li>Download the <a href="https://github.com/LAURIDS0/lc_els/archive/refs/heads/main.zip">latest version</a> and unzip it as <code>lc_els</code>.</li>
+    <li>Or clone the repository: <code>git clone https://github.com/LAURIDS0/lc_els.git</code></li>
+</ul>
+
+<h3>Start the resource</h3>
+<pre data-lang="cfg">ensure lc_els</pre>
+
+<h3>Try it</h3>
+<p>Get in the driver seat of an emergency vehicle and press <code>Q</code> for the lights, then <code>ALT</code> for the siren. See <a href="#/controls">Controls</a>.</p>
+</div>
+
+<h2>Next steps</h2>
+<ul>
+    <li><a href="#/controls">Controls</a>: every key and what it does.</li>
+    <li><a href="#/config">Config</a>: change the keys, the sirens and which vehicles can use it.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Common Issues
+     ===================================================================== -->
+<article data-page="issues" data-crumb="LC Els">
+<h1>Common Issues</h1>
+<p>Problems that come up with LC Els, and how to solve them.</p>
+
+<h2>Nothing happens in a vehicle</h2>
+<ul>
+    <li>Only the driver can use the lights and sirens.</li>
+    <li>With <a href="#/config/emergencyonly"><code>EmergencyOnly = true</code></a> (the default), only vehicles in GTA's emergency class (class <code>18</code>) work. Check the vehicle's class in its <code>vehicles.meta</code>, or set <code>EmergencyOnly = false</code>.</li>
+</ul>
+
+<h2>ALT doesn't start the siren</h2>
+<p>The siren needs the lights. Press <code>Q</code> first, then <code>ALT</code>. Holding <code>R</code> for a short wail works without the lights.</p>
+
+<h2>The siren stops when I get out</h2>
+<p>That is on purpose: the siren and horn stop when the driver leaves the vehicle, and the lights stay on.</p>
+
+<h2>A key does something else as well</h2>
+<p>The keys are GTA controls, so other resources may use the same ones (<code>ALT</code> is also the character wheel). Change them in <a href="#/config/keys"><code>Keys</code></a>.</p>
+</article>
+
+<!-- =====================================================================
+     Config
+     ===================================================================== -->
+<article data-page="config" data-crumb="LC Els">
+<h1>Config</h1>
+<p>Everything is in <code>config.lua</code>. It is loaded on both client and server. Restart the resource after changing it.</p>
+
+<h2>Keys</h2>
+<ul><li>Keys: <code>table</code>
+    <ul><li>The <a href="https://docs.fivem.net/docs/game-references/controls/" target="_blank" rel="noopener">GTA control IDs</a> for each action.</li></ul>
+    <ul>
+        <li>lights: <code>number</code>
+            <ul><li>Toggle the emergency lights. Defaults to <code>44</code> (<code>Q</code>).</li></ul></li>
+        <li>siren: <code>number</code>
+            <ul><li>Toggle the siren. Defaults to <code>19</code> (<code>ALT</code>).</li></ul></li>
+        <li>cycle: <code>number</code>
+            <ul><li>Next siren, or a short wail while the siren is off. Defaults to <code>45</code> (<code>R</code>).</li></ul></li>
+        <li>horn: <code>number</code>
+            <ul><li>The air horn while held. Defaults to <code>86</code> (<code>E</code>).</li></ul></li>
+    </ul></li></ul>
+<pre data-lang="lua">Keys = {
+    lights = 44, -- Q
+    siren = 19,  -- ALT
+    cycle = 45,  -- R
+    horn = 86,   -- E
+},</pre>
+
+<h2>EmergencyOnly</h2>
+<ul><li>EmergencyOnly: <code>boolean</code>
+    <ul><li><code>true</code>: only vehicles in GTA's emergency class (<code>18</code>) can use LC Els. <code>false</code>: every vehicle. Defaults to <code>true</code>.</li></ul></li></ul>
+
+<h2>Sirens</h2>
+<ul><li>Sirens: <code>table[]</code>
+    <ul><li>The sirens, in the order <code>R</code> cycles through them. The first one is used when the siren starts and for the short wail.</li></ul>
+    <ul>
+        <li>name: <code>string</code>
+            <ul><li>A name for the siren.</li></ul></li>
+        <li>sound: <code>string</code>
+            <ul><li>The game sound to play from the vehicle.</li></ul></li>
+    </ul></li></ul>
+<pre data-lang="lua">Sirens = {
+    { name = 'WAIL', sound = 'VEHICLES_HORNS_SIREN_1' },
+    { name = 'YELP', sound = 'VEHICLES_HORNS_SIREN_2' },
+    { name = 'PRIORITY', sound = 'VEHICLES_HORNS_POLICE_WARNING' },
+},</pre>
+
+<h2>Horn</h2>
+<ul><li>Horn: <code>table</code>
+    <ul>
+        <li>sound: <code>string</code>
+            <ul><li>The game sound of the air horn. Defaults to <code>'SIRENS_AIRHORN'</code>.</li></ul></li>
+    </ul></li></ul>
+</article>
+
+<!-- =====================================================================
+     Controls
+     ===================================================================== -->
+<article data-page="controls" data-crumb="LC Els">
+<h1>Controls</h1>
+<p>The default keys. Only the driver of an emergency vehicle can use them. Change them in <a href="#/config/keys">Keys</a>.</p>
+
+<div class="table"><table>
+<thead><tr><th>Key</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><code>Q</code></td><td>Turn the emergency lights on or off. Turning them off also stops the siren.</td></tr>
+<tr><td><code>ALT</code></td><td>Turn the siren on or off. Needs the lights on; starts on the first siren.</td></tr>
+<tr><td><code>R</code></td><td>Siren on: switch to the next siren. Siren off: a wail while held.</td></tr>
+<tr><td><code>E</code></td><td>Air horn while held.</td></tr>
+</tbody></table></div>
+
+<h2>Siren order</h2>
+<p>With the siren on, <code>R</code> goes through the sirens in the order of <a href="#/config/sirens">Sirens</a> and starts over:</p>
+<pre data-lang="cfg">WAIL -> YELP -> PRIORITY -> WAIL</pre>
+
+<h2>Leaving the vehicle</h2>
+<ul>
+    <li>Getting out: the lights stay on, the siren and horn stop.</li>
+    <li>Getting in another vehicle: everything on the old one is turned off.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Events
+     ===================================================================== -->
+<article data-page="events" data-crumb="LC Els">
+<h1>Events</h1>
+<p>LC Els has no exports. The driver's client sends the state to the server, and the server sends it on to every player, so everyone hears the siren from the vehicle. They are listed for debugging.</p>
+
+<div class="table"><table>
+<thead><tr><th>Name</th><th>Direction</th><th>Data</th></tr></thead>
+<tbody>
+<tr><td><code>lc_els:lightState</code></td><td>client to server to all clients</td><td><code>vehicleNetId, active</code></td></tr>
+<tr><td><code>lc_els:sirenState</code></td><td>client to server to all clients</td><td><code>vehicleNetId, active, mode</code> (<code>mode</code> is the index in <a href="#/config/sirens">Sirens</a>)</td></tr>
+<tr><td><code>lc_els:hornState</code></td><td>client to server to all clients</td><td><code>vehicleNetId, active</code></td></tr>
+</tbody></table></div>
+<p>The server adds the sender's id when it forwards an event, so a client never plays its own siren twice.</p>
+</article>

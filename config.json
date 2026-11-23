@@ -63,7 +63,8 @@
         "height": 360,
         "objectFit": "contain",
         "objectPosition": "center"
-      }
+      },
+      "docs": "docs/#/lc_jobgarages"
     },
     {
       "fullLink": "https://github.com/LAURIDS0/lc_garages",
@@ -84,7 +85,8 @@
         "height": 360,
         "objectFit": "contain",
         "objectPosition": "center"
-      }
+      },
+      "docs": "docs/#/lc_garages"
     },
     {
       "fullLink": "https://github.com/LAURIDS0/lc_els",
@@ -105,7 +107,8 @@
         "height": 360,
         "objectFit": "contain",
         "objectPosition": "center"
-      }
+      },
+      "docs": "docs/#/lc_els"
     }
   ]
 }
