@@ -1,0 +1,41 @@
+/* =====================================================================
+   Fedora (GNOME, Adwaita light): black top bar with the clock in the
+   middle, floating dash at the bottom, light windows with only a
+   close button
+   ===================================================================== */
+.theme-fedora {
+    --font: 13px Cantarell, 'Noto Sans', system-ui, sans-serif;
+    --win-bg: #fafafa;  --win-fg: #2e3436;  --win-border: rgba(0, 0, 0, .15);  --win-radius: 12px;
+    --title-bg: #ebebeb;  --title-fg: #2e3436;  --title-h: 40px;
+    --toolbar-bg: #ebebeb;  --field-bg: #fff;  --field-fg: #2e3436;  --field-border: #d6d6d6;  --field-radius: 6px;
+    --sidebar-bg: #f0f0f0;  --sidebar-fg: #2e3436;
+    --accent: #dcdcdc;  --accent-fg: #2e3436;  --hover: rgba(0, 0, 0, .06);  --folder: #438de6;
+    --area-top: 28px;  --area-bottom: 76px;
+    background: radial-gradient(ellipse at 25% 75%, #51a2da 0%, transparent 50%), linear-gradient(150deg, #0b1f3a 0%, #294172 55%, #3c6eb4 100%);
+    color: #fff;
+}
+.theme-fedora .panel { top: 0; height: 28px; background: #000; color: #fff; }
+.theme-fedora .panel .menu .fa-fedora { color: #51a2da; }
+.theme-fedora .panel .clock { position: absolute; left: 50%; transform: translateX(-50%); }
+.theme-fedora .dock {
+    bottom: 10px; left: 50%; transform: translateX(-50%);
+    padding: 6px; gap: 6px; border-radius: 22px;
+    background: rgba(40, 40, 40, .7); color: #fff;
+}
+.theme-fedora .dock-item { width: 48px; height: 48px; border-radius: 14px; font-size: 22px; }
+.theme-fedora .app-browser { color: #ff9500; }
+.theme-fedora .app-files { color: #51a2da; }
+.theme-fedora .icons { top: 44px; left: 16px; }
+
+/* Windows: GNOME shows only a round close button */
+.theme-fedora .win-min, .theme-fedora .win-max { display: none; }
+.theme-fedora .win-close { width: 24px; height: 24px; border-radius: 50%; background: rgba(0, 0, 0, .08); font-size: 11px; }
+.theme-fedora .win-close:hover { background: rgba(0, 0, 0, .15); color: inherit; }
+.theme-fedora .win-title { padding-left: 32px; /* keeps the title centered next to the button */ }
+.theme-fedora .place.active { font-weight: 600; }
+
+/* Terminal: Ptyxis dark, plain [user@host dir]$ prompt */
+.term[data-os="fedora"] {
+    --term-bg: #1e1e1e;  --term-fg: #f6f5f4;  --term-font: 14px 'Source Code Pro', 'DejaVu Sans Mono', monospace;
+    --prompt: #f6f5f4;
+}

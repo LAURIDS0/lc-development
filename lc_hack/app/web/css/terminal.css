@@ -1,0 +1,39 @@
+/* The window and the CLI. The terminal's look per OS is in desktop/themes (.term[data-os]). */
+
+html, body { margin: 0; height: 100%; background: transparent; }
+
+#box {
+    display: none;
+    position: absolute; top: 10%; left: 10%;
+    width: 80vw; height: 80vh;
+    background: #0c0c0c; color: #ccc;
+    border-radius: 6px; overflow: hidden;
+}
+
+/* The CLI: fills the whole box, or the whole terminal window on a desktop */
+.term {
+    height: 100%;
+    box-sizing: border-box; padding: 12px;
+    overflow-y: auto;
+    font: var(--term-font, 14px monospace);
+    background: var(--term-bg, #0c0c0c); color: var(--term-fg, #ccc);
+}
+
+.output { white-space: pre-wrap; }
+
+.line { display: flex; align-items: flex-end; } /* The input stays on the last line of a two-line prompt */
+.prompt { color: var(--prompt, #4e4); white-space: pre; }
+.p-user { color: var(--prompt-user, inherit); font-weight: var(--prompt-weight, normal); }
+.p-path { color: var(--prompt-path, inherit); font-weight: var(--prompt-weight, normal); }
+.p-frame { color: var(--prompt-frame, inherit); }
+.root .p-user, .root .p-frame { color: var(--prompt-root, inherit); }
+
+.input {
+    flex: 1;
+    background: none; border: none; outline: none;
+    color: inherit; font: inherit; padding: 0;
+    caret-color: var(--term-caret, currentColor);
+}
+
+/* Browser test mode (dev.js): fill the whole window */
+body.dev #box { top: 0; left: 0; width: 100vw; height: 100vh; border-radius: 0; }

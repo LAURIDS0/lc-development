@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lc_hack</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/terminal.css">
+    <link rel="stylesheet" href="css/mirror.css">
+    <link rel="stylesheet" href="css/desktop/layout.css">
+    <link rel="stylesheet" href="css/desktop/apps.css">
+    <link rel="stylesheet" href="css/desktop/themes/ubuntu.css">
+    <link rel="stylesheet" href="css/desktop/themes/kali.css">
+    <link rel="stylesheet" href="css/desktop/themes/macos.css">
+    <link rel="stylesheet" href="css/desktop/themes/chromeos.css">
+    <link rel="stylesheet" href="css/desktop/themes/mint.css">
+    <link rel="stylesheet" href="css/desktop/themes/fedora.css">
+</head>
+<body>
+    <div id="box">
+        <!-- The CLI. Moved into a terminal window while a desktop is open -->
+        <div id="term" class="term">
+            <div id="output" class="output"></div>
+            <div id="line" class="line">
+                <span id="prompt" class="prompt"></span>
+                <input id="input" class="input" autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+        <!-- The desktop (Ubuntu, Kali, macOS, ChromeOS, Mint, Fedora) -->
+        <div id="desktop" hidden></div>
+    </div>
+    <!-- Terminal: order matters, later files use earlier ones -->
+    <script src="js/terminal/state.js"></script>
+    <script src="js/terminal/instances.js"></script>
+    <script src="js/terminal/os.js"></script>
+    <script src="js/terminal/default-files.js"></script>
+    <script src="js/terminal/helpers.js"></script>
+    <script src="js/terminal/filesystem.js"></script>
+    <script src="js/terminal/sync.js"></script>
+    <script src="js/terminal/machines.js"></script>
+    <script src="js/terminal/prompt.js"></script>
+    <script src="js/terminal/network.js"></script>
+    <script src="js/terminal/auth.js"></script>
+    <script src="js/terminal/commands/help.js"></script>
+    <script src="js/terminal/commands/files.js"></script>
+    <script src="js/terminal/commands/system.js"></script>
+    <script src="js/terminal/commands/network.js"></script>
+    <script src="js/terminal/commands/tools.js"></script>
+    <script src="js/terminal/commands/desktop.js"></script>
+    <script src="js/terminal/commands/cameras.js"></script>
+    <script src="js/terminal/commands/access.js"></script>
+    <script src="js/terminal/run.js"></script>
+    <script src="js/terminal/completion.js"></script>
+    <script src="js/terminal/saved.js"></script>
+    <script src="js/terminal/open.js"></script>
+    <script src="js/terminal/keyboard.js"></script>
+    <!-- Desktops -->
+    <script src="js/desktop/themes.js"></script>
+    <script src="js/desktop/desktop.js"></script>
+    <script src="js/desktop/window.js"></script>
+    <!-- Apps: the dock shows them in this order -->
+    <script src="js/desktop/apps/terminal.js"></script>
+    <script src="js/desktop/apps/files.js"></script>
+    <script src="js/desktop/apps/browser.js"></script>
+    <script src="js/desktop/apps/editor.js"></script>
+    <script src="js/desktop/apps/viewer.js"></script>
+    <script src="js/desktop/apps/monitor.js"></script>
+    <script src="js/desktop/apps/cameras.js"></script>
+    <script src="js/mirror.js"></script>
+    <script src="js/dev.js"></script>
+</body>
+</html>

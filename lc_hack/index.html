@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Try LC Hack in your browser: the terminal, every desktop and the cameras.">
+<title>Try LC Hack</title>
+<link rel="icon" type="image/png" href="../images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../docs/docs.css">
+<script>
+    try { document.documentElement.dataset.theme = localStorage.getItem('lc_docs_theme') || 'dark'; } catch { document.documentElement.dataset.theme = 'dark'; }
+</script>
+<style>
+    .demo { display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; }
+    .demo-side { width: 300px; flex: none; font-size: 14px; }
+    .demo-side h1 { font-size: 24px; margin: 0 0 6px; }
+    .demo-side h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin: 22px 0 8px; }
+    .demo-side p { color: var(--text-soft); margin: 0 0 8px; }
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .choices.wide { grid-template-columns: 1fr; }
+    .choice { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-soft); color: var(--text-soft); font: inherit; text-align: left; cursor: pointer; }
+    .choice:hover { color: var(--text); }
+    .choice[aria-pressed="true"] { border-color: var(--text); color: var(--text); font-weight: 600; }
+    .choice small { display: block; font-weight: 400; color: var(--text-muted); }
+    .demo-side details { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; background: var(--bg-card); }
+    .demo-side summary { cursor: pointer; font-weight: 600; }
+    .demo-side ol, .demo-side ul { padding-left: 18px; margin: 8px 0; color: var(--text-soft); }
+    .demo-side code { font-size: 12px; }
+    .demo-main { flex: 1; min-width: 0; }
+    .demo-bar { display: flex; gap: 8px; margin-bottom: 10px; }
+    .demo-bar .hint { margin-left: auto; align-self: center; font-size: 13px; color: var(--text-muted); }
+    .screen { position: relative; width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #000; }
+    .screen iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    @media (max-width: 900px) {
+        .demo { flex-direction: column; padding: 16px; }
+        .demo-side { width: auto; }
+    }
+</style>
+</head>
+<body class="site">
+
+<header class="navbar">
+    <a class="brand" href="../"><img src="../images/logo.png" alt="LC Development"><span>LC Development</span></a>
+    <a class="nav-text" href="../">Scripts</a>
+    <a class="nav-text" href="../docs/#/lc_hack">Documentation</a>
+    <a class="icon-btn" href="https://github.com/LAURIDS0/lc_hack" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+    <button class="icon-btn" id="theme" type="button" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+</header>
+
+<div class="demo">
+    <aside class="demo-side">
+        <h1>Try LC Hack</h1>
+        <p>The real LC Hack, running in your browser. Pick a desktop and a scenario, then click the screen and type.</p>
+
+        <h2>Scenario</h2>
+        <div class="choices wide" id="scenarios">
+            <button class="choice" data-hack="" type="button"><i class="fa-solid fa-terminal"></i><span>The /hack example<small>Get root on db-server</small></span></button>
+            <button class="choice" data-hack="../scenarios/cameras.lua" type="button"><i class="fa-solid fa-video"></i><span>Cameras<small>Watch three cameras at once</small></span></button>
+        </div>
+
+        <h2>Desktop</h2>
+        <div class="choices" id="desktops">
+            <button class="choice" data-desktop="ubuntu" type="button"><i class="fa-brands fa-ubuntu"></i>Ubuntu</button>
+            <button class="choice" data-desktop="kali" type="button"><i class="fa-solid fa-dragon"></i>Kali</button>
+            <button class="choice" data-desktop="macos" type="button"><i class="fa-brands fa-apple"></i>macOS</button>
+            <button class="choice" data-desktop="chromeos" type="button"><i class="fa-brands fa-chrome"></i>ChromeOS</button>
+            <button class="choice" data-desktop="mint" type="button"><i class="fa-brands fa-linux"></i>Mint</button>
+            <button class="choice" data-desktop="fedora" type="button"><i class="fa-brands fa-fedora"></i>Fedora</button>
+            <button class="choice" data-desktop="none" type="button"><i class="fa-solid fa-keyboard"></i>Terminal only</button>
+            <button class="choice" data-desktop="random" type="button"><i class="fa-solid fa-shuffle"></i>Random</button>
+        </div>
+
+        <h2>Things to try</h2>
+        <details>
+            <summary>The terminal</summary>
+            <ul>
+                <li><code>help</code> lists every command</li>
+                <li><code>ls -la</code>, <code>cd</code>, <code>tree</code>, <code>grep</code>, <code>find</code></li>
+                <li><code>nano note.txt</code>, <code>cp</code>, <code>mv</code>, <code>rm</code></li>
+                <li><code>ifconfig</code>, <code>nmap 10.0.0.0/24</code>, <code>ping</code></li>
+                <li>Tab completes, arrow up shows history</li>
+            </ul>
+        </details>
+        <details>
+            <summary>The desktop</summary>
+            <ul>
+                <li>Open the terminal twice: every terminal has its own logins and history</li>
+                <li>Files, the text editor, the image viewer and the system monitor</li>
+                <li>The browser: <code>northbank.com</code> is an always-on server with a website</li>
+                <li>In the terminal: <code>startx</code> without a desktop, <code>rdp</code> to another one</li>
+            </ul>
+        </details>
+        <details>
+            <summary>The cameras</summary>
+            <ul>
+                <li>The passwords are in <code>cameras.txt</code> on the desktop</li>
+                <li><code>view 10.9.1.101</code> and so on: each camera opens its own window</li>
+                <li>Click a window to make it live; the others freeze on their last picture</li>
+                <li>In the game the live window shows the real camera; here it is a picture</li>
+            </ul>
+        </details>
+        <details>
+            <summary>Solution: the /hack example</summary>
+            <ol>
+                <li><code>cat /var/mail/alex</code></li>
+                <li><code>ssh backup@10.0.0.12</code> (Secure2026)</li>
+                <li><code>cat /opt/backup.sh</code></li>
+                <li><code>ssh dbadmin@db-server</code> (Tr0ll3y!)</li>
+                <li><code>cat ~/.mysql_history</code></li>
+                <li><code>su</code> with the root password from it</li>
+            </ol>
+        </details>
+    </aside>
+
+    <main class="demo-main">
+        <div class="demo-bar">
+            <button class="button" id="restart" type="button"><i class="fa-solid fa-rotate-right"></i>Restart</button>
+            <button class="button" id="fullscreen" type="button"><i class="fa-solid fa-expand"></i>Fullscreen</button>
+            <span class="hint">Esc closes the hack, it starts again by itself</span>
+        </div>
+        <div class="screen"><iframe id="app" title="LC Hack" allow="fullscreen"></iframe></div>
+    </main>
+</div>
+
+<script>
+    // The demo is lc_hack's own browser test mode (app/web), copied here by sync.sh
+    const app = document.getElementById('app');
+    const state = { hack: '', desktop: 'ubuntu' };
+    const params = new URLSearchParams(location.search);
+    if (params.has('desktop')) state.desktop = params.get('desktop');
+    if (params.get('scenario') === 'cameras') state.hack = '../scenarios/cameras.lua';
+
+    function load() {
+        const q = new URLSearchParams({ desktop: state.desktop });
+        if (state.hack) q.set('hack', state.hack);
+        app.src = `app/web/index.html?${q}`;
+        for (const b of document.querySelectorAll('[data-hack]')) b.setAttribute('aria-pressed', b.dataset.hack === state.hack);
+        for (const b of document.querySelectorAll('[data-desktop]')) b.setAttribute('aria-pressed', b.dataset.desktop === state.desktop);
+        app.addEventListener('load', () => app.focus(), { once: true });
+    }
+    document.getElementById('scenarios').onclick = e => { const b = e.target.closest('[data-hack]'); if (b) { state.hack = b.dataset.hack; load(); } };
+    document.getElementById('desktops').onclick = e => { const b = e.target.closest('[data-desktop]'); if (b) { state.desktop = b.dataset.desktop; load(); } };
+    document.getElementById('restart').onclick = load;
+    document.getElementById('fullscreen').onclick = () => app.requestFullscreen?.();
+    load();
+
+    function setTheme(theme) {
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('#theme i').className = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        try { localStorage.setItem('lc_docs_theme', theme); } catch { /* not kept */ }
+    }
+    setTheme(document.documentElement.dataset.theme || 'dark');
+    document.getElementById('theme').onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+</script>
+</body>
+</html>

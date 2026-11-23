@@ -1,0 +1,11 @@
+body { margin: 0; font-family: Georgia, serif; background: #f5f1e8; color: #1f2a37; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: #0f3d5e; }
+.logo { height: 40px; }
+nav a { color: #f5f1e8; margin-left: 20px; text-decoration: none; font-family: system-ui, sans-serif; }
+nav a:hover { text-decoration: underline; }
+main { padding: 24px 32px; max-width: 760px; }
+h1 { color: #0f3d5e; }
+.cards { display: flex; gap: 14px; flex-wrap: wrap; }
+.card { flex: 1; min-width: 180px; background: #fff; border-left: 4px solid #c8a24a; padding: 10px 16px; }
+.card h2 { font-size: 18px; margin: 6px 0; }
+footer { padding: 16px 32px; color: #6b7280; font-size: 13px; }

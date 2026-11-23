@@ -20,7 +20,8 @@
         "height": 360,
         "objectFit": "contain",
         "objectPosition": "center"
-      }
+      },
+      "demo": "lc_hack/"
     },
     {
       "fullLink": "https://github.com/LAURIDS0/lc_phonehack",

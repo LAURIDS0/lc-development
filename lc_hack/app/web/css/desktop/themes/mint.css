@@ -1,0 +1,35 @@
+/* =====================================================================
+   Linux Mint (Cinnamon, Mint-Y): panel at the bottom with the menu and
+   launchers on the left and the tray on the right, green accents
+   ===================================================================== */
+.theme-mint {
+    --font: 13px Ubuntu, 'Noto Sans', system-ui, sans-serif;
+    --win-bg: #fafafa;  --win-fg: #303030;  --win-border: rgba(0, 0, 0, .2);  --win-radius: 6px;
+    --title-bg: #ebebeb;  --title-fg: #303030;  --title-h: 32px;
+    --toolbar-bg: #f0f0f0;  --field-bg: #fff;  --field-fg: #303030;  --field-border: #cfcfcf;  --field-radius: 4px;
+    --sidebar-bg: #f0f0f0;  --sidebar-fg: #303030;
+    --accent: #8fa876;  --accent-fg: #fff;  --hover: rgba(143, 168, 118, .2);  --folder: #8fa876;
+    --area-bottom: 40px;
+    background: radial-gradient(ellipse at 70% 30%, #6d8a4f 0%, transparent 55%), linear-gradient(160deg, #2f3a2a 0%, #1e2420 60%, #121512 100%);
+    color: #fff;
+}
+.theme-mint .panel { bottom: 0; height: 40px; background: #2f2f2f; color: #eee; border-top: 1px solid #3c3c3c; }
+.theme-mint .panel .menu { font-size: 20px; color: #8fa876; }
+.theme-mint .panel .host { order: 3; margin-left: auto; font-size: 12px; }
+.theme-mint .panel .tray { order: 4; margin-left: 0; }
+.theme-mint .panel .clock { order: 5; margin-left: 0; }
+.theme-mint .panel .power { order: 6; }
+.theme-mint .dock { bottom: 0; left: 46px; height: 40px; align-items: center; gap: 2px; color: #eee; }
+.theme-mint .dock-item { width: 38px; height: 34px; font-size: 16px; border-radius: 4px; }
+.theme-mint .dock-item:hover { background: rgba(143, 168, 118, .35); }
+.theme-mint .icons { top: 14px; left: 14px; bottom: 56px; }
+
+/* Windows: title in the middle, buttons on the right, green close on hover */
+.theme-mint .win-btn { width: 24px; height: 24px; border-radius: 50%; }
+.theme-mint .win-close:hover { background: #8fa876; }
+
+/* Terminal: black with green user and blue path */
+.term[data-os="mint"] {
+    --term-bg: #1d1f21;  --term-fg: #e6e6e6;  --term-font: 14px 'DejaVu Sans Mono', monospace;
+    --prompt: #e6e6e6;  --prompt-user: #8ae234;  --prompt-path: #729fcf;  --prompt-weight: bold;
+}

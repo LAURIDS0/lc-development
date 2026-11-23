@@ -1,0 +1,26 @@
+/* =====================================================================
+   Ubuntu (GNOME, Yaru dark): black top bar, dock on the left,
+   dark windows with round buttons, purple terminal
+   ===================================================================== */
+.theme-ubuntu {
+    --font: 13px Ubuntu, 'Noto Sans', system-ui, sans-serif;
+    --win-bg: #2c2c2c;  --win-fg: #eee;  --win-border: #1a1a1a;  --win-radius: 12px;
+    --title-bg: #303030;  --title-fg: #eee;  --title-h: 38px;
+    --toolbar-bg: #303030;  --field-bg: #3a3a3a;  --field-fg: #eee;  --field-border: #3a3a3a;  --field-radius: 6px;
+    --sidebar-bg: #262626;  --sidebar-fg: #ddd;
+    --accent: #e95420;  --hover: rgba(255, 255, 255, .08);  --folder: #e95420;
+    --area-top: 28px;  --area-left: 58px;
+    background: linear-gradient(135deg, #2c001e 0%, #77216f 45%, #e95420 100%); color: #fff;
+}
+.theme-ubuntu .panel { top: 0; height: 28px; background: #000; color: #fff; }
+.theme-ubuntu .panel .menu .fa-ubuntu { color: #e95420; }
+.theme-ubuntu .panel .clock { position: absolute; left: 50%; transform: translateX(-50%); }
+.theme-ubuntu .dock { top: 28px; bottom: 0; left: 0; width: 58px; flex-direction: column; align-items: center; padding-top: 8px; background: rgba(0, 0, 0, .55); }
+.theme-ubuntu .win-btn { width: 24px; height: 24px; border-radius: 50%; background: #4a4a4a; font-size: 11px; }
+.theme-ubuntu .win-close:hover { background: #e95420; }
+
+/* Terminal: Ubuntu purple, green user, blue path */
+.term[data-os="ubuntu"] {
+    --term-bg: #300a24;  --term-fg: #fff;  --term-font: 14px 'Ubuntu Mono', 'DejaVu Sans Mono', monospace;
+    --prompt: #fff;  --prompt-user: #8ae234;  --prompt-path: #729fcf;  --prompt-weight: bold;
+}

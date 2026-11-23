@@ -1,0 +1,100 @@
+/* =====================================================================
+   Desktop apps. Colors come from the theme variables (layout.css).
+   ===================================================================== */
+
+/* Shared: toolbars, fields and buttons */
+.files-toolbar, .editor-toolbar, .browser-toolbar, .viewer-bar {
+    display: flex; align-items: center; gap: 8px; padding: 6px 8px; flex: none;
+    background: var(--toolbar-bg); border-bottom: 1px solid var(--win-border);
+}
+.files-btn, .browser-btn, .viewer-btn, .editor-save {
+    border: none; border-radius: var(--field-radius); padding: 4px 9px;
+    background: transparent; color: inherit;
+}
+.files-btn:hover, .browser-btn:hover, .viewer-btn:hover, .editor-save:hover { background: var(--hover); }
+.files-path, .editor-path, .browser-address {
+    flex: 1; min-width: 0; padding: 4px 10px; box-sizing: border-box;
+    border: 1px solid var(--field-border); border-radius: var(--field-radius);
+    background: var(--field-bg); color: var(--field-fg);
+    font: 12px monospace; outline: none;
+}
+.editor-path:focus, .browser-address:focus { border-color: var(--accent); }
+
+/* ---------- Files ---------- */
+.files { display: flex; flex-direction: column; overflow: hidden; }
+.files-path { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.files-hidden { font-size: 12px; white-space: nowrap; }
+.files-main { flex: 1; min-height: 0; display: flex; }
+.files-sidebar {
+    width: 150px; flex: none; padding: 8px 6px; overflow: auto;
+    background: var(--sidebar-bg); color: var(--sidebar-fg);
+    border-right: 1px solid var(--win-border);
+}
+.place { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; cursor: default; white-space: nowrap; }
+.place i { width: 16px; text-align: center; opacity: .8; }
+.place:hover { background: var(--hover); }
+.place.active { background: var(--accent); color: var(--accent-fg); }
+.files-list {
+    flex: 1; overflow: auto; padding: 10px;
+    display: grid; grid-template-columns: repeat(auto-fill, 86px); gap: 8px; align-content: start;
+}
+.file { text-align: center; padding: 6px 2px; border-radius: 6px; cursor: default; }
+.file:hover { background: var(--hover); }
+.file-icon { font-size: 30px; color: #8a94a6; }
+.file-icon.folder { color: var(--folder, #f2b544); }
+.file-icon.locked { color: #d9822b; }
+.file-name { word-break: break-all; font-size: 12px; margin-top: 4px; }
+.files-empty { grid-column: 1 / -1; opacity: .6; padding: 20px; text-align: center; }
+
+/* ---------- Text editor ---------- */
+.editor { display: flex; flex-direction: column; overflow: hidden; }
+.editor-status { font-size: 12px; opacity: .7; min-width: 52px; }
+.editor-text {
+    flex: 1; margin: 0; padding: 12px; box-sizing: border-box;
+    border: none; outline: none; resize: none; background: var(--editor-bg, transparent); color: inherit;
+    font: var(--editor-font, 13px monospace); white-space: pre-wrap; word-break: break-all; user-select: text;
+}
+
+/* ---------- Image viewer ---------- */
+.viewer { display: flex; flex-direction: column; overflow: hidden; }
+.viewer-stage { flex: 1; min-height: 0; display: grid; place-items: center; padding: 12px; background: var(--viewer-bg, #1c1c1c); color: #ccc; }
+.viewer-img { max-width: 100%; max-height: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, .4); }
+.viewer-bar { order: var(--viewer-bar-order, 1); justify-content: center; border-bottom: none; border-top: 1px solid var(--win-border); }
+.viewer-name { min-width: 220px; text-align: center; font-size: 12px; }
+
+/* ---------- Web browser ---------- */
+.browser { display: flex; flex-direction: column; overflow: hidden; }
+.browser-address { font: 13px system-ui, sans-serif; }
+.browser-view { flex: 1; min-height: 0; background: #fff; color: #222; position: relative; }
+.browser-frame { width: 100%; height: 100%; border: none; background: #fff; }
+.browser-notice { padding: 48px 40px; max-width: 520px; font-family: system-ui, sans-serif; }
+.browser-notice h2 { margin: 0 0 12px; font-weight: 500; }
+.browser-notice p { color: #555; line-height: 1.5; }
+.browser-loading { padding: 40px; color: #777; font-family: system-ui, sans-serif; }
+
+/* ---------- System monitor ---------- */
+.monitor { overflow: auto; }
+.monitor-row { display: grid; grid-template-columns: 1fr 80px 60px 56px 56px; gap: 8px; padding: 4px 12px; font-size: 12px; }
+.monitor-row span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.monitor-row:nth-child(odd):not(.monitor-head) { background: var(--hover); }
+.monitor-head { position: sticky; top: 0; font-weight: 600; background: var(--toolbar-bg); border-bottom: 1px solid var(--win-border); }
+
+/* ---------- Error dialog ---------- */
+.dialog { display: flex; align-items: center; gap: 14px; padding: 18px; }
+.dialog-icon { font-size: 28px; color: #e0a800; }
+
+/* ---------- Cameras ---------- */
+.camera { display: flex; flex-direction: column; overflow: hidden; background: #000; }
+.camera-picture { position: relative; flex: 1; min-height: 0; }
+.camera-feed { position: absolute; inset: 0; }                 /* Live: the game shows through here */
+.camera-still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+.window.frozen .camera-still { display: block; filter: grayscale(.6) brightness(.85); }
+.camera-overlay { flex: none; display: flex; justify-content: space-between; padding: 4px 10px; background: #111; font: 12px ui-monospace, monospace; color: #ddd; }
+.camera-rec { color: #ff3b30; }
+.window.frozen .camera-rec { color: #777; }
+.window.live .camera-state { color: #34c759; }
+.camera-list { padding: 10px; }
+.camera-hint { margin: 0 0 10px; font-size: 12px; opacity: .7; }
+.camera-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; margin-bottom: 6px; border: 1px solid var(--win-border); border-radius: 6px; background: transparent; color: inherit; text-align: left; }
+.camera-row:hover { background: var(--hover); }
+.camera-row-state { margin-left: auto; font-size: 12px; opacity: .7; }

@@ -8,6 +8,7 @@
 //    name, description, tags
 //    readmeBranch  the branch with the README (default main)
 //    docs          optional link to its documentation, e.g. "docs/#/lc_hack"
+//    demo          optional link to a page where it can be tried, e.g. "lc_hack/"
 //    image         { src, alt, objectFit, objectPosition }
 // =====================================================================
 
@@ -57,6 +58,7 @@ function renderScripts(scripts) {
                 <div class="tags">${(script.tags || []).map(tag => `<span class="badge">${escapeHtml(tag)}</span>`).join('')}</div>
                 <div class="actions">
                     ${script.docs ? `<a class="button primary" href="${escapeHtml(script.docs)}"><i class="fa-solid fa-book"></i>Docs</a>` : ''}
+                    ${script.demo ? `<a class="button" href="${escapeHtml(script.demo)}"><i class="fa-solid fa-play"></i>Try it</a>` : ''}
                     <button class="button" type="button" data-readme="${i}"><i class="fa-regular fa-file-lines"></i>README</button>
                     <a class="button" href="${escapeHtml(script.fullLink || '#')}" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Repository</a>
                 </div>

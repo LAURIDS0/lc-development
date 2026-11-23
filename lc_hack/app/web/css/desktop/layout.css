@@ -1,0 +1,94 @@
+/* =====================================================================
+   Desktops: shared layout. Each look is in themes/, which sets the
+   variables below and places the panel, dock and window buttons.
+   ===================================================================== */
+
+/* Defaults; every theme overrides these (:where = no specificity, so .theme-x wins) */
+:where(#desktop) {
+    --font: 13px system-ui, sans-serif;
+    --win-bg: #fff;  --win-fg: #111;  --win-border: rgba(0, 0, 0, .25);  --win-radius: 8px;
+    --win-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+    --title-bg: #eee;  --title-fg: #222;  --title-h: 32px;
+    --toolbar-bg: #f5f5f5;  --field-bg: #fff;  --field-fg: #111;  --field-border: #ccc;  --field-radius: 4px;
+    --sidebar-bg: #f0f0f0;  --sidebar-fg: #333;
+    --accent: #3584e4;  --accent-fg: #fff;  --hover: rgba(127, 127, 127, .18);
+    --area-top: 0px;  --area-bottom: 0px;  --area-left: 0px; /* Space the panel and dock take (maximized windows) */
+}
+
+#desktop {
+    position: absolute; inset: 0;
+    overflow: hidden;
+    font: var(--font);
+    user-select: none;
+}
+#desktop[hidden] { display: none; }
+#desktop button { font-family: inherit; cursor: pointer; }
+
+/* ---------- Panel ---------- */
+.panel {
+    position: absolute; left: 0; right: 0; z-index: 5000;
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 12px; box-sizing: border-box;
+}
+.panel .menu { display: flex; align-items: center; gap: 8px; }
+.panel .host { opacity: .8; }
+.panel .tray { display: flex; gap: 10px; font-size: 12px; }
+.panel .clock { margin-left: auto; white-space: pre; }
+.panel .tray + .clock { margin-left: 0; }
+.panel .tray { margin-left: auto; }
+.panel .power { background: none; border: none; color: inherit; font-size: 14px; padding: 0 4px; }
+
+/* ---------- Dock / taskbar ---------- */
+.dock { position: absolute; z-index: 5001; display: flex; gap: 6px; }
+.dock-item {
+    width: 42px; height: 42px; font-size: 20px;
+    border: none; border-radius: 10px; background: transparent; color: inherit;
+}
+.dock-item:hover { background: rgba(255, 255, 255, .15); }
+
+/* ---------- Desktop icons (Home, Trash and ~/Desktop) ---------- */
+.icons {
+    position: absolute; top: 48px; bottom: 80px; left: 76px;
+    display: flex; flex-direction: column; flex-wrap: wrap; align-content: flex-start; gap: 10px;
+}
+.icon { width: 84px; padding: 4px 2px; text-align: center; color: #fff; text-shadow: 0 1px 3px #000; cursor: default; border-radius: 6px; }
+.icon-img { font-size: 32px; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .6)); }
+.icon-label { margin-top: 4px; word-break: break-word; font-size: 12px; }
+.icon:hover { background: rgba(255, 255, 255, .12); }
+.icon.selected { background: rgba(255, 255, 255, .25); }
+
+/* ---------- Windows ---------- */
+.window {
+    position: absolute;
+    display: flex; flex-direction: column;
+    background: var(--win-bg); color: var(--win-fg);
+    border: 1px solid var(--win-border); border-radius: var(--win-radius);
+    box-shadow: var(--win-shadow);
+    overflow: hidden;
+}
+.window.minimized { display: none; }
+.window.maximized {
+    left: var(--area-left) !important; top: var(--area-top) !important;
+    width: calc(100% - var(--area-left)) !important; height: calc(100% - var(--area-top) - var(--area-bottom)) !important;
+    border-radius: 0;
+}
+.titlebar {
+    display: flex; align-items: center; gap: 8px;
+    height: var(--title-h); padding: 0 8px 0 12px; flex: none;
+    background: var(--title-bg); color: var(--title-fg);
+    cursor: move;
+}
+.win-title { flex: 1; text-align: center; font-weight: 600; pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.win-controls { display: flex; align-items: center; gap: 4px; }
+.win-btn {
+    display: grid; place-items: center;
+    width: 28px; height: 24px; padding: 0;
+    border: none; border-radius: 4px; background: none; color: inherit; font-size: 12px;
+}
+.win-btn:hover { background: var(--hover); }
+.win-close:hover { background: #e81123; color: #fff; }
+.win-body { flex: 1; min-height: 0; overflow: auto; }
+
+/* Terminal window: the CLI fills it */
+.terminal-body { overflow: hidden; }
+.terminal-body .term { height: 100%; }

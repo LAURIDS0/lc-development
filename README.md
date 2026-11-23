@@ -42,3 +42,7 @@ Dokumentationen til alle scripts ligger i `docs/`:
 Links i en content-fil: `#/config` går til en side i samme script, `#~/lc_hack/...` går til et andet script. Siden med id `index` er scriptets forside.
 
 Test lokalt med `python3 -m http.server 8000` i repoet og åbn `http://localhost:8000/docs/`.
+
+## Prøv LC Hack (`lc_hack/`)
+
+`lc_hack/index.html` kører lc_hack's egen browser-testtilstand i en iframe. `lc_hack/app/` er en kopi af lc_hack; opdatér den efter ændringer i lc_hack med `sh lc_hack/sync.sh`. Egne scenarier ligger i `lc_hack/scenarios/`.

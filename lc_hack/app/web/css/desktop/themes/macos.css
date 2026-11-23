@@ -1,0 +1,83 @@
+/* =====================================================================
+   macOS: translucent menu bar at the top, floating dock at the bottom,
+   light windows with traffic lights on the left, white Terminal
+   ===================================================================== */
+.theme-macos {
+    --font: 13px -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+    --win-bg: #fff;  --win-fg: #1d1d1f;  --win-border: rgba(0, 0, 0, .18);  --win-radius: 10px;
+    --win-shadow: 0 22px 50px rgba(0, 0, 0, .45);
+    --title-bg: linear-gradient(#f2f2f2, #e4e4e4);  --title-fg: #444;  --title-h: 30px;
+    --toolbar-bg: #f6f6f6;  --field-bg: #fff;  --field-fg: #1d1d1f;  --field-border: #d6d6d6;  --field-radius: 6px;
+    --sidebar-bg: #ebe9ec;  --sidebar-fg: #3c3c3c;
+    --accent: #d4d4d8;  --accent-fg: #1d1d1f;  --hover: rgba(0, 0, 0, .06);  --folder: #5aa9f8;
+    --editor-font: 14px -apple-system, 'Helvetica Neue', sans-serif;  --viewer-bg: #e9e9e9;  --viewer-bar-order: -1;
+    --area-top: 26px;  --area-bottom: 76px;
+    background:
+        radial-gradient(ellipse at 15% 85%, #ff9a5a 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 15%, #8f6bff 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 70%, #ff5f8f 0%, transparent 45%),
+        linear-gradient(160deg, #1c2b6b 0%, #3a2a7a 50%, #a23d6e 100%);
+    color: #111;
+}
+
+/* ---------- Menu bar ---------- */
+.theme-macos .panel {
+    top: 0; height: 26px; gap: 16px; padding: 0 14px;
+    background: rgba(255, 255, 255, .28); backdrop-filter: blur(20px) saturate(160%);
+    color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+}
+.theme-macos .panel .menu { gap: 18px; }
+.theme-macos .panel .menu .fa-apple { font-size: 15px; }
+.theme-macos .menu-app { font-weight: 700; }
+.theme-macos .panel .host { opacity: 1; }
+.theme-macos .panel .power { font-size: 12px; }
+
+/* ---------- Dock ---------- */
+.theme-macos .dock {
+    bottom: 8px; left: 50%; transform: translateX(-50%);
+    align-items: flex-end; gap: 8px; padding: 6px 8px; border-radius: 18px;
+    background: rgba(255, 255, 255, .22); backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, .35);
+}
+.theme-macos .dock-item {
+    width: 50px; height: 50px; font-size: 24px; border-radius: 12px; color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+    transition: transform .15s ease;
+}
+.theme-macos .dock-item:hover { background-color: transparent; transform: translateY(-8px) scale(1.15); }
+.theme-macos .app-terminal { background: linear-gradient(#3a3a3a, #111); color: #e6e6e6; }
+.theme-macos .app-files { background: linear-gradient(90deg, #6cc4ff 50%, #e9f2fb 50%); color: #1a3a5c; }
+.theme-macos .app-browser { background: linear-gradient(#fff, #e6e6e6); color: #1a7cf0; }
+.theme-macos .app-editor { background: linear-gradient(#fff, #e6e6e6); color: #555; }
+.theme-macos .app-viewer { background: linear-gradient(#fff, #e6e6e6); color: #e0a800; }
+.theme-macos .app-monitor { background: linear-gradient(#3a3a3a, #111); color: #4cd964; }
+.theme-macos .app-trash { background: rgba(255, 255, 255, .55); color: #555; }
+.theme-macos .dock-sep { width: 1px; align-self: stretch; margin: 4px 2px; background: rgba(255, 255, 255, .45); }
+
+/* ---------- Desktop icons: top right ---------- */
+.theme-macos .icons { top: 42px; bottom: 90px; left: auto; right: 18px; flex-wrap: wrap-reverse; }
+.theme-macos .icon.selected { background: rgba(0, 0, 0, .25); }
+
+/* ---------- Windows: traffic lights on the left ---------- */
+.theme-macos .titlebar { border-bottom: 1px solid #cfcfcf; padding: 0 12px; }
+.theme-macos .win-title { font-weight: 600; padding-right: 52px; /* keeps the title centered next to the lights */ }
+.theme-macos .win-controls { order: -1; gap: 8px; }
+.theme-macos .win-close { order: -1; }
+.theme-macos .win-btn { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .12); font-size: 0; color: rgba(0, 0, 0, .55); }
+.theme-macos .titlebar:hover .win-btn { font-size: 8px; }
+.theme-macos .win-close, .theme-macos .win-close:hover { background: #ff5f57; color: rgba(0, 0, 0, .55); }
+.theme-macos .win-min, .theme-macos .win-min:hover { background: #febc2e; }
+.theme-macos .win-max, .theme-macos .win-max:hover { background: #28c840; }
+
+/* Finder: translucent sidebar with grey selection */
+.theme-macos .files-sidebar { border-right: none; }
+.theme-macos .place.active { font-weight: 500; }
+
+/* Safari: address field centered in the toolbar */
+.theme-macos .browser-address { text-align: center; background: #ececec; border-color: transparent; }
+
+/* Terminal: the Basic profile, black on white */
+.term[data-os="macos"] {
+    --term-bg: #fff;  --term-fg: #000;  --term-font: 13px 'SF Mono', Menlo, Monaco, monospace;
+    --prompt: #000;  --term-caret: #777;
+}

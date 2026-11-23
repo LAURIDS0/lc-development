@@ -1,0 +1,30 @@
+/* =====================================================================
+   Kali Linux (Xfce, Kali-Dark): dark top panel with app launchers,
+   blue accents, square windows with buttons on the right
+   ===================================================================== */
+.theme-kali {
+    --font: 13px Cantarell, 'Noto Sans', system-ui, sans-serif;
+    --win-bg: #1a1b26;  --win-fg: #ddd;  --win-border: #367bf0;  --win-radius: 4px;
+    --title-bg: #23243a;  --title-fg: #ddd;  --title-h: 28px;
+    --toolbar-bg: #23243a;  --field-bg: #2e3048;  --field-fg: #ddd;  --field-border: #3b3e5c;  --field-radius: 3px;
+    --sidebar-bg: #1e1f2e;  --sidebar-fg: #ccc;
+    --accent: #367bf0;  --hover: rgba(54, 123, 240, .2);  --folder: #367bf0;
+    --viewer-bg: #11121b;
+    --area-top: 28px;
+    background: radial-gradient(ellipse at 70% 60%, #1b2a4a 0%, #0b1020 60%, #05070d 100%); color: #ddd;
+}
+.theme-kali .panel { top: 0; height: 28px; background: #1e1f29; color: #ddd; border-bottom: 1px solid #367bf0; }
+.theme-kali .panel .menu { color: #367bf0; font-weight: 600; }
+.theme-kali .panel .host { margin-left: 250px; }
+.theme-kali .dock { top: 0; left: 130px; height: 28px; align-items: center; gap: 2px; }
+.theme-kali .dock-item { width: 30px; height: 26px; font-size: 13px; border-radius: 3px; }
+.theme-kali .icons { top: 44px; left: 14px; }
+.theme-kali .win-title { text-align: left; }
+.theme-kali .win-btn { width: 24px; height: 20px; border-radius: 3px; }
+
+/* Terminal: two-line Kali prompt, blue frame, red for root */
+.term[data-os="kali"] {
+    --term-bg: #0f111a;  --term-fg: #e6e6e6;  --term-font: 14px 'Fira Code', 'DejaVu Sans Mono', monospace;
+    --prompt: #e6e6e6;  --prompt-frame: #3b8eea;  --prompt-user: #3b8eea;  --prompt-path: #fff;
+    --prompt-weight: bold;  --prompt-root: #e0383e;
+}
