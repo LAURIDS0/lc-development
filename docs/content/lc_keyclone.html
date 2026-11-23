@@ -7,6 +7,7 @@
         <a data-page="functions/server">Server</a>
     </div>
     <div data-folder="Guides">
+        <a data-page="guides/keys">Key Scripts</a>
         <a data-page="guides/readers">Keycard Readers</a>
         <a data-page="guides/playing">Playing</a>
         <a data-page="guides/how-it-works">How it Works</a>
@@ -31,7 +32,7 @@
 <ul>
     <li><a href="#~/lc_hack">LC Hack</a> 1.4.0 or newer</li>
     <li><a href="https://github.com/overextended/ox_lib" target="_blank" rel="noopener">ox_lib</a></li>
-    <li><a href="https://github.com/Qbox-project/qbx_vehiclekeys" target="_blank" rel="noopener">qbx_vehiclekeys</a> (optional, gives the vehicle keys)</li>
+    <li>A vehicle key script (optional): qbx_vehiclekeys, qb-vehiclekeys, wasabi_carlock, qs-vehiclekeys, MrNewbVehicleKeys, jaksam's vehicles_keys or cd_garage, see <a href="#/guides/keys">Key Scripts</a>.</li>
     <li><a href="https://github.com/overextended/ox_inventory" target="_blank" rel="noopener">ox_inventory</a> (optional, for the device and the keycards)</li>
     <li>OneSync, so the server knows the vehicles.</li>
 </ul>
@@ -64,6 +65,7 @@ ensure lc_keyclone</pre>
 
 <h2>Next steps</h2>
 <ul>
+    <li><a href="#/guides/keys">Key Scripts</a>: the seven vehicle key scripts it works with.</li>
     <li><a href="#/guides/readers">Keycard Readers</a>: make doors clonable with ox_doorlock.</li>
     <li><a href="#/guides/playing">Playing</a>: what the player does, step by step.</li>
     <li><a href="#/config">Config</a>: range, cooldown, blacklisted vehicles and more.</li>
@@ -89,7 +91,8 @@ ensure lc_keyclone</pre>
 
 <h2>The player got root but no keys</h2>
 <ul>
-    <li>Keys are given with qbx_vehiclekeys, when it is started and <code>vehicles.giveKeys</code> is <code>true</code>. Otherwise give them in <a href="#/config/oncloned"><code>onCloned</code></a>.</li>
+    <li>Keys are given with one of the <a href="#/guides/keys">supported key scripts</a>. With <code>keys = 'auto'</code>, one of them must be started; with another key script, give the keys in <a href="#/config/oncloned"><code>onCloned</code></a>.</li>
+    <li>The server console prints <code>[lc_keyclone] ... could not give keys</code> when the key script fails.</li>
     <li>The vehicle must still be parked and within <code>range</code> when the player becomes root.</li>
 </ul>
 
@@ -146,14 +149,14 @@ ensure lc_keyclone</pre>
     <ul>
         <li>enabled: <code>boolean</code>
             <ul><li>List parked vehicles in <code>scan</code>. Defaults to <code>true</code>.</li></ul></li>
-        <li>giveKeys: <code>boolean</code>
-            <ul><li>Give keys with qbx_vehiclekeys when it is started. Defaults to <code>true</code>.</li></ul></li>
+        <li>keys: <code>string</code> or <code>false</code>
+            <ul><li>The key script that gives the keys, see <a href="#/guides/keys">Key Scripts</a>. <code>'auto'</code> uses the first supported one that is started, a resource name always uses that one, <code>false</code> gives no keys. Defaults to <code>'auto'</code>.</li></ul></li>
         <li>blacklist: <code>string[]</code>
             <ul><li>Spawn codes that can never be cloned, e.g. emergency vehicles.</li></ul></li>
     </ul></li></ul>
 <pre data-lang="lua">vehicles = {
     enabled = true,
-    giveKeys = true,
+    keys = 'auto',
     blacklist = { 'police', 'police2', 'ambulance', 'firetruk' },
 },</pre>
 
@@ -171,11 +174,11 @@ ensure lc_keyclone</pre>
 
 <h2>onCloned</h2>
 <ul><li>onCloned: <code>function(source: number, kind: 'vehicle' | 'reader', target: number)</code>
-    <ul><li>Called on the server for every clone, with or without qbx_vehiclekeys and ox_inventory. <code>target</code> is the vehicle's network id, or the reader's index in <code>readers</code>.</li></ul></li></ul>
+    <ul><li>Called on the server for every clone, with or without a key script and ox_inventory. <code>target</code> is the vehicle's network id, or the reader's index in <code>readers</code>.</li></ul></li></ul>
 <p><strong>Example</strong></p>
 <pre data-lang="lua">onCloned = function(source, kind, target)
     if kind == 'vehicle' then
-        -- Give keys with your own key system, alert the owner, ...
+        -- Alert the owner, give XP, ...
     end
 end,</pre>
 </article>
@@ -196,6 +199,52 @@ end,</pre>
 <h2>useCloner</h2>
 <p>The ox_inventory item export. Point the key cloner item's <code>server.export</code> to it; you don't call it yourself. It opens the device and keeps the item.</p>
 <pre data-lang="lua">server = { export = 'lc_keyclone.useCloner' },</pre>
+</article>
+
+<!-- =====================================================================
+     Guides / Key Scripts
+     ===================================================================== -->
+<article data-page="guides/keys" data-crumb="LC Keyclone / Guides">
+<h1>Key Scripts</h1>
+<p>A cloned vehicle gives keys with the key script your server uses. LC Keyclone works with the seven most used ones out of the box.</p>
+
+<h2>Supported key scripts</h2>
+<p>With <a href="#/config/vehicles"><code>vehicles.keys = 'auto'</code></a> (the default), the first of these that is started is used, in this order:</p>
+<div class="table"><table>
+<thead><tr><th>Key script</th><th>How the keys are given (server)</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/Qbox-project/qbx_vehiclekeys" target="_blank" rel="noopener">qbx_vehiclekeys</a></td><td><code>exports.qbx_vehiclekeys:GiveKeys(source, vehicle, true)</code></td></tr>
+<tr><td><a href="https://www.quasar-store.com/docs/vehiclekeys" target="_blank" rel="noopener">qs-vehiclekeys</a></td><td><code>exports['qs-vehiclekeys']:GiveKeys(source, plate, true)</code></td></tr>
+<tr><td><a href="https://docs.wasabiscripts.com/advanced-series/wasabi-carlock/exports" target="_blank" rel="noopener">wasabi_carlock</a></td><td><code>exports.wasabi_carlock:GiveKeys(source, plate, model)</code></td></tr>
+<tr><td><a href="https://mrnewbs-scrips.gitbook.io/guide/mrnewbvehiclekeys-beta" target="_blank" rel="noopener">MrNewbVehicleKeys</a></td><td><code>exports.MrNewbVehicleKeys:GiveKeys(source, netId)</code></td></tr>
+<tr><td><a href="https://documentation.jaksam-scripts.com/vehicles-keys" target="_blank" rel="noopener">vehicles_keys (jaksam)</a></td><td><code>exports['vehicles_keys']:giveVehicleKeysToPlayerId(source, plate, 'temporary')</code></td></tr>
+<tr><td><a href="https://docs.codesign.pro/paid-scripts/garage/developer-api/events" target="_blank" rel="noopener">cd_garage</a></td><td><code>TriggerClientEvent('cd_garage:AddKeys', source, plate)</code></td></tr>
+<tr><td><a href="https://github.com/qbcore-fivem/qb-vehiclekeys" target="_blank" rel="noopener">qb-vehiclekeys</a></td><td><code>exports['qb-vehiclekeys']:GiveKeys(source, plate)</code></td></tr>
+</tbody></table></div>
+<ul>
+    <li>Plates are passed without the spaces GTA pads them with.</li>
+    <li>qb-vehiclekeys is tried last, because several other key scripts also answer to its name.</li>
+    <li>An error in the key script is printed in the server console; the clone still counts and <code>onCloned</code> is still called.</li>
+</ul>
+
+<h2>Choosing one</h2>
+<p>If more than one is started, set the one to use:</p>
+<pre data-lang="lua">vehicles = {
+    keys = 'wasabi_carlock',
+},</pre>
+
+<h2>Another key script</h2>
+<p>Set <code>keys = false</code> and give the keys in <a href="#/config/oncloned"><code>onCloned</code></a>. It gets the vehicle's network id:</p>
+<pre data-lang="lua">vehicles = {
+    keys = false,
+},
+
+onCloned = function(source, kind, target)
+    if kind ~= 'vehicle' then return end
+    local vehicle = NetworkGetEntityFromNetworkId(target)
+    local plate = GetVehicleNumberPlateText(vehicle)
+    exports.my_keys:GiveKeys(source, plate) -- your key script's export
+end,</pre>
 </article>
 
 <!-- =====================================================================
@@ -289,6 +338,7 @@ end,</pre>
 <tbody>
 <tr><td><code>config.lua</code></td><td>Everything you can change, including the readers.</td></tr>
 <tr><td><code>server/main.lua</code></td><td>The device, <code>scan</code>, <code>connect</code>, the checks and the rewards.</td></tr>
+<tr><td><code>server/keys.lua</code></td><td>Gives the keys with the key script the server uses.</td></tr>
 <tr><td><code>server/targets.lua</code></td><td>Target names, codes and the files they are hidden in. Plain Lua, so it can be tested on its own.</td></tr>
 </tbody></table></div>
 </article>
