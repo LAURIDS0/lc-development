@@ -70,6 +70,7 @@ function renderScriptCards(scripts) {
           </div>
           <div class="script-meta">
             <a class="button primary" href="${repoUrl}" target="_blank" rel="noreferrer">View repository</a>
+            ${script.docs ? `<a class="button" href="${escapeHtml(script.docs)}">Documentation</a>` : ""}
           </div>
           <div class="readme-block readme-inline">
             <div class="readme-status" data-status>Loading README…</div>

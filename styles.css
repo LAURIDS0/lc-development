@@ -60,6 +60,15 @@ a {
   font-size: 0.70rem;
 }
 
+.header-links {
+  display: flex;
+  gap: 6px;
+}
+
+a.header-pill:hover {
+  color: var(--text);
+}
+
 .header-pill {
   padding: 5px 9px;
   border-radius: 999px;

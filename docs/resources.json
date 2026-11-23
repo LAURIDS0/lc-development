@@ -1,0 +1,36 @@
+[
+    {
+        "id": "lc_hack",
+        "name": "LC Hack",
+        "icon": "fa-solid fa-terminal",
+        "description": "A hacking minigame with a fake Linux terminal, six desktops, networks, firewalls and websites. The core the other hacks build on.",
+        "github": "https://github.com/LAURIDS0/lc_hack",
+        "image": "images/lc_hack/desktop-macos.png",
+        "status": "released",
+        "updated": "November 23, 2026"
+    },
+    {
+        "id": "lc_phonehack",
+        "name": "LC Phonehack",
+        "icon": "fa-solid fa-mobile-screen",
+        "description": "Hack the phones of NPCs nearby with a laptop. Built on LC Hack.",
+        "github": "https://github.com/LAURIDS0/lc_phonehack",
+        "image": "images/lc_phonehack/laptop.png",
+        "status": "released",
+        "updated": "November 23, 2026"
+    },
+    {
+        "id": "lc_keyclone",
+        "name": "LC Keyclone",
+        "icon": "fa-solid fa-key",
+        "description": "Coming soon. Built on LC Hack.",
+        "status": "soon"
+    },
+    {
+        "id": "lc_cardhack",
+        "name": "LC Cardhack",
+        "icon": "fa-solid fa-credit-card",
+        "description": "Coming soon. Built on LC Hack.",
+        "status": "soon"
+    }
+]

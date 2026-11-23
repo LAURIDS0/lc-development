@@ -1,11 +1,59 @@
 {
   "scripts": [
     {
+      "fullLink": "https://github.com/LAURIDS0/lc_hack",
+      "name": "LC Hack",
+      "description": "A hacking minigame with a fake Linux terminal, desktops, networks and websites.",
+      "readmeBranch": "main",
+      "docs": "docs/#/lc_hack",
+      "tags": [
+        "FiveM",
+        "Free",
+        "Hacking"
+      ],
+      "image": {
+        "src": "images/lc_hack.png",
+        "name": "Free",
+        "alt": "lc_hack preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
+      "fullLink": "https://github.com/LAURIDS0/lc_phonehack",
+      "name": "LC Phonehack",
+      "description": "Hack the phones of NPCs nearby with a laptop. Built on LC Hack.",
+      "readmeBranch": "main",
+      "docs": "docs/#/lc_phonehack",
+      "tags": [
+        "FiveM",
+        "Free",
+        "Hacking"
+      ],
+      "image": {
+        "src": "images/lc_phonehack.png",
+        "name": "Free",
+        "alt": "lc_phonehack preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
       "fullLink": "https://github.com/LAURIDS0/lc_jobgarages",
       "name": "LC Job Garages",
       "description": "A simple job garages script for FiveM.",
       "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "Job Garages"],
+      "tags": [
+        "FiveM",
+        "Free",
+        "Job Garages"
+      ],
       "image": {
         "src": "images/lc_jobgarages.png",
         "name": "Free",
@@ -22,7 +70,11 @@
       "name": "LC Garages",
       "description": "A simple garages script for FiveM.",
       "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "Garages"],
+      "tags": [
+        "FiveM",
+        "Free",
+        "Garages"
+      ],
       "image": {
         "src": "images/lc_garages.png",
         "name": "Free",
@@ -39,7 +91,11 @@
       "name": "LC Els",
       "description": "A simple els script for FiveM.",
       "readmeBranch": "main",
-      "tags": ["FiveM", "Free", "ELS"],
+      "tags": [
+        "FiveM",
+        "Free",
+        "ELS"
+      ],
       "image": {
         "src": "images/lc_els.png",
         "name": "Free",

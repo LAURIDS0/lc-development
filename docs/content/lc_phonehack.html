@@ -1,0 +1,270 @@
+<!-- Sidebar: data-page is the article's id, data-folder groups pages -->
+<nav data-nav>
+    <a data-page="index">Overview</a>
+    <a data-page="issues">Common Issues</a>
+    <a data-page="config">Config</a>
+    <div data-folder="Functions">
+        <a data-page="functions/server">Server</a>
+    </div>
+    <div data-folder="Guides">
+        <a data-page="guides/playing">Playing</a>
+        <a data-page="guides/how-it-works">How it Works</a>
+    </div>
+</nav>
+
+<!-- =====================================================================
+     Overview
+     ===================================================================== -->
+<article data-page="index">
+<h1>LC Phonehack</h1>
+<div class="buttons">
+    <a class="button" href="https://github.com/LAURIDS0/lc_phonehack" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Repository</a>
+    <a class="button" href="https://github.com/LAURIDS0/lc_phonehack/releases/latest" target="_blank" rel="noopener"><i class="fa-solid fa-download"></i>Download</a>
+</div>
+<p>Hack the phones of NPCs nearby with a laptop. The player gets <a href="#~/lc_hack">LC Hack</a>'s terminal and desktop with two extra commands: <code>scan</code> finds phones nearby, and <code>connect</code> connects to one. Then the player logs in, finds the phone's PIN in its files and uses it with <code>su</code>.</p>
+<img class="shot" src="images/lc_phonehack/laptop.png" alt="Scanning for phones, connecting to one and reading its messages" loading="lazy">
+
+<h2>Installation</h2>
+<div class="steps">
+<h3>Install all resource dependencies</h3>
+<ul>
+    <li><a href="#~/lc_hack">LC Hack</a> 1.4.0 or newer</li>
+    <li><a href="https://github.com/overextended/ox_lib" target="_blank" rel="noopener">ox_lib</a></li>
+    <li><a href="https://github.com/overextended/ox_inventory" target="_blank" rel="noopener">ox_inventory</a> (optional, a command opens the laptop without it)</li>
+    <li>OneSync with population (the default), so the server knows the NPCs.</li>
+</ul>
+
+<h3>Download a release or clone the source code</h3>
+<ul>
+    <li>Download the <a href="https://github.com/LAURIDS0/lc_phonehack/releases/latest" target="_blank" rel="noopener">latest release</a>.</li>
+    <li>Or clone the repository: <code>git clone https://github.com/LAURIDS0/lc_phonehack.git</code></li>
+</ul>
+
+<h3>Start the resource</h3>
+<p>Start lc_phonehack after lc_hack in your <code>server.cfg</code>.</p>
+<pre data-lang="cfg">ensure ox_lib
+ensure lc_hack
+ensure lc_phonehack</pre>
+
+<h3>Add the items</h3>
+<p>With ox_inventory, add the laptop and the reward to <code>ox_inventory/data/items.lua</code>. <code>consume = 0</code> keeps the laptop when it's used.</p>
+<pre data-lang="lua">['hacking_laptop'] = {
+    label = 'Hacking Laptop',
+    weight = 1500,
+    stack = false,
+    consume = 0,
+    server = { export = 'lc_phonehack.useLaptop' },
+},
+
+['phone_data'] = {
+    label = 'Phone Data',
+    weight = 10,
+},</pre>
+<p>Without ox_inventory, players open the laptop with <code>/laptop</code>, see <a href="#/config/command">command</a>.</p>
+</div>
+
+<h2>Next steps</h2>
+<ul>
+    <li><a href="#/guides/playing">Playing</a>: what the player does, step by step.</li>
+    <li><a href="#/config">Config</a>: range, rewards, cooldown and more.</li>
+    <li><a href="#/guides/how-it-works">How it Works</a>: how it is built on LC Hack, to make your own hack type.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Common Issues
+     ===================================================================== -->
+<article data-page="issues" data-crumb="LC Phonehack">
+<h1>Common Issues</h1>
+<p>Problems that come up when setting up lc_phonehack, and how to solve them.</p>
+
+<h2>scan never finds any devices</h2>
+<ul>
+    <li>The server has to know the NPCs. Use OneSync with population (the default); with population turned off there are no NPCs on the server.</li>
+    <li>Only NPCs within <a href="#/config/range"><code>range</code></a> (default <code>25.0</code> meters) are listed, and only part of them carry a phone (<a href="#/config/chance"><code>chance</code></a>).</li>
+    <li>Players and dead NPCs never show up.</li>
+</ul>
+
+<h2>"connect: ... is out of range"</h2>
+<p>The NPC walked away or the player moved after <code>scan</code>. Run <code>scan</code> again and connect to a device that is close.</p>
+
+<h2>The player got root but no reward</h2>
+<ul>
+    <li>The NPC must still be within <code>range</code> when the player becomes root, and each connection gives its reward once.</li>
+    <li>The item is only added when ox_inventory is started. Without it, give rewards in <a href="#/config/onhacked"><code>onHacked</code></a>.</li>
+</ul>
+
+<h2>/laptop doesn't exist</h2>
+<p>The command is only added when ox_inventory isn't started. With ox_inventory, players use the <code>hacking_laptop</code> item instead.</p>
+</article>
+
+<!-- =====================================================================
+     Config
+     ===================================================================== -->
+<article data-page="config" data-crumb="LC Phonehack">
+<h1>Config</h1>
+<p>Everything is in <code>config.lua</code> in the resource folder. It is only loaded on the server. Restart the resource after changing it.</p>
+
+<h2>range</h2>
+<ul><li>range: <code>number</code>
+    <ul><li>How far away (meters) a phone can be found with <code>scan</code>, and how close the NPC must stay to connect and to get the reward. Defaults to <code>25.0</code>.</li></ul></li></ul>
+
+<h2>chance</h2>
+<ul><li>chance: <code>number</code>
+    <ul><li>Part of the NPCs that carry a phone, from <code>0.0</code> to <code>1.0</code>. The same NPC always gives the same answer. Defaults to <code>0.6</code>.</li></ul></li></ul>
+
+<h2>maxDevices</h2>
+<ul><li>maxDevices: <code>number</code>
+    <ul><li>Most devices <code>scan</code> lists, closest first. Defaults to <code>8</code>.</li></ul></li></ul>
+
+<h2>cooldown</h2>
+<ul><li>cooldown: <code>number</code>
+    <ul><li>Seconds before a hacked phone can be hacked again. It shows as <code>locked</code> meanwhile. Defaults to <code>600</code>.</li></ul></li></ul>
+
+<h2>attempts</h2>
+<ul><li>attempts: <code>number</code>
+    <ul><li>Wrong passwords and PINs allowed in one laptop session. The laptop closes when they run out. Defaults to <code>4</code>.</li></ul></li></ul>
+
+<h2>desktop</h2>
+<ul><li>desktop: <code>string</code> or <code>false</code>
+    <ul><li>The laptop's desktop, one of LC Hack's <a href="#~/lc_hack/guides/desktops">desktops</a>, or <code>false</code> for a terminal only. Defaults to <code>'kali'</code>.</li></ul></li></ul>
+
+<h2>item</h2>
+<ul><li>item: <code>string</code>
+    <ul><li>The ox_inventory item that opens the laptop. Point the item's <code>server.export</code> to <code>lc_phonehack.useLaptop</code>. Defaults to <code>'hacking_laptop'</code>.</li></ul></li></ul>
+
+<h2>command</h2>
+<ul><li>command: <code>table</code> or <code>false</code>
+    <ul><li>A command that opens the laptop when ox_inventory isn't started. <code>false</code> for none.</li></ul>
+    <ul>
+        <li>name: <code>string</code>
+            <ul><li>Defaults to <code>'laptop'</code>.</li></ul></li>
+        <li>restricted?: <code>string</code> or <code>false</code>
+            <ul><li>An ace the player needs, e.g. <code>'group.admin'</code>. <code>false</code> for everyone.</li></ul></li>
+    </ul></li></ul>
+
+<h2>reward</h2>
+<ul><li>reward: <code>table</code> or <code>false</code>
+    <ul><li>The item a hacked phone gives, when ox_inventory is started.</li></ul>
+    <ul>
+        <li>item: <code>string</code>
+            <ul><li>Defaults to <code>'phone_data'</code>.</li></ul></li>
+        <li>count?: <code>number</code>
+            <ul><li>Defaults to <code>1</code>.</li></ul></li>
+    </ul></li></ul>
+
+<h2>onHacked</h2>
+<ul><li>onHacked: <code>function(source: number, device: string)</code>
+    <ul><li>Called on the server for every hacked phone, with or without ox_inventory. <code>device</code> is the phone's name, e.g. <code>'Pixel-8c13'</code>.</li></ul></li></ul>
+<p><strong>Example</strong></p>
+<pre data-lang="lua">onHacked = function(source, device)
+    -- Give money with your framework, alert the police, ...
+    print(('%s hacked %s'):format(GetPlayerName(source), device))
+end,</pre>
+</article>
+
+<!-- =====================================================================
+     Functions / Server
+     ===================================================================== -->
+<article data-page="functions/server" data-crumb="LC Phonehack / Functions">
+<h1>Server</h1>
+
+<h2>openLaptop</h2>
+<p>Opens the laptop for a player, e.g. from your own item, job or command.</p>
+<pre data-lang="lua">exports.lc_phonehack:openLaptop(source)</pre>
+<ul><li>source: <code>number</code></li></ul>
+<p>Return:</p>
+<ul><li><code>boolean</code> - Returns <code>false</code> if the player is already hacking.</li></ul>
+<p><strong>Example</strong></p>
+<pre data-lang="lua">RegisterCommand('hackphones', function(source)
+    if not exports.lc_phonehack:openLaptop(source) then
+        TriggerClientEvent('ox_lib:notify', source, { type = 'error', description = 'You are busy.' })
+    end
+end, true)</pre>
+
+<h2>useLaptop</h2>
+<p>The ox_inventory item export. Point the laptop item's <code>server.export</code> to it; you don't call it yourself. It opens the laptop and keeps the item.</p>
+<pre data-lang="lua">server = { export = 'lc_phonehack.useLaptop' },</pre>
+</article>
+
+<!-- =====================================================================
+     Guides / Playing
+     ===================================================================== -->
+<article data-page="guides/playing" data-crumb="LC Phonehack / Guides">
+<h1>Playing</h1>
+<p>What the player does, from opening the laptop to the reward.</p>
+
+<div class="steps">
+<h3>Open the laptop</h3>
+<p>Use the <code>hacking_laptop</code> item, or <code>/laptop</code> without ox_inventory. <code>help</code> lists the new commands under "Tools", and <code>~/Desktop/README.txt</code> explains them.</p>
+
+<h3>Scan for phones</h3>
+<p><code>scan</code> lists the phones of NPCs nearby, closest first. Walk closer to people for more devices.</p>
+<pre data-lang="cfg">ID  DEVICE          SIGNAL    STATUS
+1   Pixel-8c13      -41 dBm   available
+2   Galaxy-cce4     -52 dBm   available
+3   Phone-1a7f      -63 dBm   locked</pre>
+<p><code>locked</code> phones were hacked a moment ago and can't be hacked yet.</p>
+
+<h3>Connect</h3>
+<p><code>connect 1</code> connects to the phone and tells its IP. Log in with <code>ssh mobile@&lt;ip&gt;</code>; no password is needed.</p>
+
+<h3>Find the PIN</h3>
+<p>The PIN is somewhere in the phone's files: a note, a message, a settings file or a hidden file. Look around with <code>ls -a</code>, <code>cat</code>, <code>grep</code> and <code>find</code>. Careful: an old PIN is there too, and a wrong PIN costs an attempt.</p>
+
+<h3>Become root</h3>
+<p>Run <code>su</code> and type the PIN. The player gets the reward, and the laptop stays open for the next phone.</p>
+</div>
+</article>
+
+<!-- =====================================================================
+     Guides / How it Works
+     ===================================================================== -->
+<article data-page="guides/how-it-works" data-crumb="LC Phonehack / Guides">
+<h1>How it Works</h1>
+<p>lc_phonehack is a hack type built on LC Hack's <a href="#~/lc_hack/guides/hacktype">building blocks</a>. It is a good starting point for your own.</p>
+
+<h2>The laptop</h2>
+<p>The laptop is an LC Hack hack started with <a href="#~/lc_hack/functions/server/starthack">startHack</a>. It has <code>target = false</code>, so it stays open until the player closes it, and two <code>commands</code> that run on the server:</p>
+<pre data-lang="lua">exports.lc_hack:startHack(source, {
+    ip = '172.20.0.1',
+    host = 'laptop',
+    desktop = 'kali',
+    target = false,
+    commands = {
+        scan = scan,       -- function(source, args) returning the lines to print
+        connect = connect,
+    },
+})</pre>
+
+<h2>Phones</h2>
+<p><code>connect</code> adds the phone to the hack with <a href="#~/lc_hack/functions/server/addmachine">addMachine</a>. It is on the laptop's network, its user has no password, and its root password is the PIN hidden in its files. <code>onRoot</code> gives the reward.</p>
+<pre data-lang="lua">exports.lc_hack:addMachine(source, {
+    ip = '172.20.0.2',
+    host = 'Pixel-8c13',
+    user = 'mobile',
+    rootPassword = pin,
+    files = phones.files(pin),
+    onRoot = function(player)
+        reward(player, netId)
+    end,
+})</pre>
+
+<h2>Security</h2>
+<p>Everything runs and is checked on the server; the client only shows the terminal.</p>
+<ul>
+    <li><code>scan</code> reads the NPCs near the player on the server. Players and dead NPCs are skipped.</li>
+    <li><code>connect</code> checks that the NPC still exists, is alive, within <code>range</code> and not on cooldown.</li>
+    <li>The PIN stays on the server like every password in LC Hack; every attempt is checked there.</li>
+    <li>The reward is given in <code>onRoot</code>, once per connection, and only while the NPC is still within <code>range</code>.</li>
+</ul>
+
+<h2>Files</h2>
+<div class="table"><table>
+<thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+<tbody>
+<tr><td><code>config.lua</code></td><td>Everything you can change.</td></tr>
+<tr><td><code>server/main.lua</code></td><td>The laptop, <code>scan</code>, <code>connect</code>, the checks and the reward.</td></tr>
+<tr><td><code>server/phones.lua</code></td><td>Which NPCs carry a phone, its name, its files and its PIN. Plain Lua, so it can be tested on its own.</td></tr>
+</tbody></table></div>
+</article>

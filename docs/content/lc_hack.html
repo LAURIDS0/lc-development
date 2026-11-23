@@ -1,0 +1,1446 @@
+<!-- Sidebar: data-page is the article's id, data-folder groups pages -->
+<nav data-nav>
+    <a data-page="index">Overview</a>
+    <a data-page="issues">Common Issues</a>
+    <a data-page="config">Config</a>
+    <a data-page="hackconfig">HackConfig</a>
+    <div data-folder="Functions">
+        <a data-page="functions/client">Client</a>
+        <a data-page="functions/server">Server</a>
+    </div>
+    <a data-page="events">Events</a>
+    <div data-folder="Guides">
+        <a data-page="guides/hack">Creating a Hack</a>
+        <a data-page="guides/website">Creating a Website</a>
+        <a data-page="guides/hacktype">Creating a Hack Type</a>
+        <a data-page="guides/examples">Examples</a>
+        <a data-page="guides/networking">Networking</a>
+        <a data-page="guides/desktops">Desktops</a>
+        <a data-page="guides/screens">Screens</a>
+        <a data-page="guides/commands">Commands</a>
+        <a data-page="guides/development">Development</a>
+    </div>
+</nav>
+
+<!-- =====================================================================
+     LC Hack (overview)
+     ===================================================================== -->
+<article data-page="index" data-crumb="" hidden>
+<h1>LC Hack</h1>
+<div class="buttons">
+    <a class="button" href="https://github.com/LAURIDS0/lc_hack" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>Repository</a>
+    <a class="button" href="https://github.com/LAURIDS0/lc_hack/releases/latest" target="_blank" rel="noopener"><i class="fa-solid fa-download"></i>Download</a>
+</div>
+<p>A hacking minigame built around a fake Linux terminal and desktops. Players read files, scan networks, hop between machines with <code>ssh</code> and <code>rdp</code> and get past firewalls until they have root access on the target machine. Passwords never leave the server.</p>
+<img class="shot" src="images/lc_hack/desktop-macos.png" alt="The macOS desktop with Finder, Preview and Terminal open" loading="lazy">
+
+<h2>Installation</h2>
+<div class="steps">
+<h3>Install all resource dependencies</h3>
+<ul>
+    <li><a href="https://github.com/overextended/ox_lib" target="_blank" rel="noopener">ox_lib</a></li>
+    <li><a href="https://github.com/overextended/ox_target" target="_blank" rel="noopener">ox_target</a> (optional, terminals use ox_lib points with <code>[E]</code> without it)</li>
+    <li>OneSync, the server checks the player's position when a terminal is used.</li>
+</ul>
+
+<h3>Download a release or clone the source code</h3>
+<ul>
+    <li>Download the <a href="https://github.com/LAURIDS0/lc_hack/releases/latest" target="_blank" rel="noopener">latest release</a>.</li>
+    <li>Or clone the repository: <code>git clone https://github.com/LAURIDS0/lc_hack.git</code></li>
+</ul>
+
+<h3>Start the resource</h3>
+<p>Start lc_hack after its dependencies in your <code>server.cfg</code>.</p>
+<pre data-lang="cfg">ensure ox_lib
+ensure ox_target
+ensure lc_hack</pre>
+
+<h3>Try it</h3>
+<p>Two test commands are included in <code>server/commands.lua</code>. Both require the <code>group.admin</code> ace.</p>
+<ul>
+    <li><code>/hack</code> opens the example network on yourself.</li>
+    <li><code>/hackterminal</code> creates a test terminal at your position.</li>
+</ul>
+<p>The example is solved by reading <code>/var/mail/alex</code>, running <code>ssh backup@10.0.0.12</code>, reading <code>/opt/backup.sh</code>, running <code>ssh dbadmin@db-server</code>, reading <code>~/.mysql_history</code> and finally <code>su</code>.</p>
+</div>
+
+<h2>Usage</h2>
+<p>lc_hack is used from your own resources through exports. Add it as a dependency, so it always starts first.</p>
+<pre data-lang="lua">dependencies {
+    'ox_lib',
+    'lc_hack',
+}</pre>
+<p>Then create a terminal in the world, or start a hack directly on a player. Both take a <a href="#/hackconfig">HackConfig</a> describing the machines.</p>
+<pre data-lang="lua">-- A terminal players use with ox_target
+exports.lc_hack:createTerminal({
+    name = 'office_pc',
+    coords = vec3(-1062.1, -246.0, 44.3),
+    config = config,
+    onSuccess = function(source)
+        -- the player got root on the target
+    end,
+})
+
+-- Or a hack started from your own code, e.g. an item
+exports.lc_hack:startHack(source, config, function(success) end)</pre>
+<p>See <a href="#/guides/examples">Examples</a> for complete setups.</p>
+
+<h2>Next steps</h2>
+<ul>
+    <li><a href="#/guides/hack">Creating a Hack</a>: build your first hack step by step and test it in the browser.</li>
+    <li><a href="#/hackconfig">HackConfig</a>: every field a hack can have.</li>
+    <li><a href="#/functions/server">Server functions</a>: terminals, hacks and minigames.</li>
+    <li><a href="#/config">Config</a>: servers that are always on, DNS and websites.</li>
+    <li><a href="#/guides/hacktype">Creating a Hack Type</a>: your own kind of hack in a separate resource, like <a href="#~/lc_phonehack">LC Phonehack</a>.</li>
+</ul>
+
+<h2>How it works</h2>
+<ul>
+    <li>Configs live on the server. The client receives a copy without <code>password</code> and <code>rootPassword</code>.</li>
+    <li>Every password attempt (<code>ssh</code>, <code>rdp</code>, <code>su</code>, <code>sudo</code>) is checked by the server, which also counts attempts.</li>
+    <li>The server decides when the player wins (root on the <code>target</code>) and calls your callbacks.</li>
+    <li>Closing a terminal pauses the hack. It is kept until the player walks away (<code>keepDistance</code>).</li>
+    <li>File contents are sent to the client so the player can read them. A cheater could read them directly, but still has to send the correct root password to the server to win.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Common Issues
+     ===================================================================== -->
+<article data-page="issues" data-crumb="LC Hack" hidden>
+<h1>Common Issues</h1>
+<p>Problems that come up when setting up terminals and networks, and how to solve them.</p>
+
+<h2>The screen is mirrored or faces the wrong way</h2>
+<p><code>heading</code> is the heading of a player <strong>standing in front of the screen and looking at it</strong>, not the direction the screen faces. Stand in front of the spot, look at it and use your own heading. If the screen faces away, add <code>180.0</code>.</p>
+
+<h2>The screen is blank or has no icons</h2>
+<ul>
+    <li>Screens are DUIs created with <code>lib.dui</code>. Make sure <a href="https://github.com/overextended/ox_lib" target="_blank" rel="noopener">ox_lib</a> is up to date.</li>
+    <li>Icons and fonts are loaded from cdnjs, so the client needs internet access.</li>
+    <li>DUIs are only created within the screen's <code>distance</code> (default <code>15.0</code>).</li>
+</ul>
+
+<h2>The ox_target option doesn't show</h2>
+<ul>
+    <li>The zone is a sphere around <code>coords</code> with <code>radius</code>. On a screen without <code>coords</code>, it sits on the screen and the radius is half the screen's width.</li>
+    <li>The option is shown within <code>radius + 2.5</code> meters. The server accepts the player within <code>radius + 3</code> meters.</li>
+    <li>Without ox_target, terminals use ox_lib points with <code>[E]</code> instead.</li>
+</ul>
+
+<h2>Terminals disappear when lc_hack restarts</h2>
+<p>Terminals live in lc_hack, so a restart removes them. Create them again when lc_hack starts.</p>
+<pre data-lang="lua">local function createTerminals()
+    exports.lc_hack:createTerminal({ ... })
+end
+
+CreateThread(createTerminals)
+
+AddEventHandler('onResourceStart', function(resource)
+    if resource == 'lc_hack' then createTerminals() end
+end)</pre>
+<p>The same goes for minigames registered with <code>registerGame</code>.</p>
+
+<h2>ssh or ping can't reach a machine</h2>
+<ul>
+    <li>Both machines need an IP on the same /24 network. A machine on another network is only reachable from a machine with an IP on both.</li>
+    <li>Names like <code>db-server</code> only work when they are in <code>/etc/hosts</code> on the machine the player is on.</li>
+    <li><code>ssh</code> needs port <code>22</code> in <code>ports</code>, and the firewall must allow the player's IP or open the port.</li>
+    <li><code>ssh</code> only works with the machine's <code>user</code>. Other usernames, including <code>root</code>, are always refused.</li>
+</ul>
+
+<h2>rdp says Connection refused</h2>
+<p>The machine needs a <code>desktop</code>, and port <code>5900</code> in <code>ports</code>. Machines without <code>ports</code> get the right port automatically.</p>
+
+<h2>startHack or startGame returns false</h2>
+<p>A player can only have one hack or minigame open at a time. Check with <code>isHacking</code> and <code>isPlaying</code>.</p>
+
+<h2>onFail is called although the player only closed the terminal</h2>
+<p>A closed terminal is kept until the player is further away than <code>keepDistance</code> (default <code>10.0</code>). Increase it if players need to walk further between computers.</p>
+
+<h2>A website shows 404 or has no styling</h2>
+<ul>
+    <li>Only files that <code>index.html</code> links to (directly or through other pages) are loaded. Check the server console for <code>website ... not found</code> warnings.</li>
+    <li>Restart lc_hack after changing <code>websites/</code> or <code>config.lua</code>.</li>
+    <li>Stylesheets and images from other sites are never loaded. Put them in the website folder.</li>
+</ul>
+
+<h2>A name like northbank.com can't be found</h2>
+<ul>
+    <li>Add the name to <code>dns</code> in <a href="#/config">config.lua</a>. <code>www.</code> names need their own entry.</li>
+    <li>A machine's own <code>/etc/hosts</code> is checked first and can point the name somewhere else.</li>
+</ul>
+
+<h2>Players can't save files on a server</h2>
+<ul>
+    <li>The player has to log in to the server in that hack (<code>ssh</code>) with the right password.</li>
+    <li>The server's user can only write in its home, <code>/tmp</code> and <code>/var/www/html</code>. Root writes everywhere.</li>
+</ul>
+
+<h2>Websites players built are gone</h2>
+<p>They are saved in <code>serverdata.json</code> in the resource folder, which is deleted when the folder is replaced on an update. See <a href="#/config/saved-changes">Saved changes</a>.</p>
+
+<h2>The browser test mode shows nothing</h2>
+<ul>
+    <li>Run the web server in the lc_hack folder (or your resources folder) and open <code>/web/</code>, not the <code>web</code> folder itself: the test mode reads <code>config.lua</code> and <code>server/commands.lua</code>.</li>
+    <li>The browser console says which file it couldn't find.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Config
+     ===================================================================== -->
+<article data-page="config" data-crumb="LC Hack" hidden>
+<h1>Config</h1>
+<p>Resource configuration is handled in <code>config.lua</code> in the resource folder. It is only loaded on the server, so passwords in it never reach players. Restart the resource after changing it.</p>
+<p>Everything in it is optional. Hacks themselves are not configured here: they are created from your own resources with <a href="#/functions/server">exports</a> and a <a href="#/hackconfig">HackConfig</a>.</p>
+
+<pre data-lang="lua">return {
+    -- Servers that are always on: part of every hack, reachable from every machine
+    servers = {
+        {
+            ip = '82.103.40.12',
+            host = 'northbank-web',
+            user = 'webadmin',
+            password = 'N0rth!Web',
+            rootPassword = 'Vault-2049',
+            website = 'websites/northbank',
+            firewall = { open = { 22, 80, 443 }, ping = true },
+        },
+    },
+
+    -- Names players can use instead of IPs
+    dns = {
+        ['northbank.com'] = '82.103.40.12',
+        ['www.northbank.com'] = '82.103.40.12',
+    },
+}</pre>
+
+<h2>servers</h2>
+<p>Servers that are always on. They are added to every hack, and every machine can reach them, like the internet, unless their own firewall blocks it. Players can <code>ssh</code> into them, and what they change on them is saved for everyone.</p>
+<ul>
+    <li>servers?: <code>table[]</code>
+        <ul><li>Each server takes the same fields as a <a href="#/hackconfig/machine">machine</a>, plus:</li></ul>
+        <ul>
+            <li>website?: <code>string</code> or <code>true</code>
+                <ul><li>A folder in the resource with a static website, see <a href="#/guides/website">Creating a Website</a>. <code>true</code> gives an empty website to build in game.</li></ul></li>
+        </ul></li>
+</ul>
+<ul>
+    <li>The <code>ip</code> must be unique across the servers and the machines in your hacks.</li>
+    <li>A server with a <code>website</code> and no <code>ports</code> gets <code>{ 22, 80, 443 }</code>. Without a firewall, every port is open to everyone.</li>
+    <li>A server can be the <code>target</code> of a hack.</li>
+</ul>
+
+<h2>dns</h2>
+<p>Names and the IP they point to. Used by the browser, <code>curl</code>, <code>ping</code>, <code>ssh</code> and every other command on every machine.</p>
+<ul>
+    <li>dns?: <code>table&lt;string, string&gt;</code>
+        <ul><li><code>[name] = ip</code>. Names are not case sensitive.</li></ul></li>
+</ul>
+<p>A machine's own <code>/etc/hosts</code> is checked first, like on Linux. Add <code>www.</code> names separately if you want them to work.</p>
+
+<h2>Saved changes</h2>
+<p>What players change on the servers is saved in <code>serverdata.json</code> in the resource folder, kept apart from <code>config.lua</code> and <code>websites/</code>.</p>
+<div class="callout warning"><i class="fa-solid fa-triangle-exclamation"></i><div><p>Replacing the resource folder on an update deletes <code>serverdata.json</code>. Keep a copy if players have built websites you want to keep. Delete it to reset every server.</p></div></div>
+
+<h2>Test commands</h2>
+<p><code>/hack</code> and <code>/hackterminal</code> in <code>server/commands.lua</code> need the <code>group.admin</code> ace. Remove the file from <code>server/main.lua</code> to disable them, or change <code>restricted</code>.</p>
+</article>
+
+<!-- =====================================================================
+     HackConfig
+     ===================================================================== -->
+<article data-page="hackconfig" data-crumb="LC Hack" hidden>
+<h1>HackConfig</h1>
+<p>A hack is described by a single table. The top-level fields describe <strong>the player's own machine</strong> plus a few game settings, and every machine in <code>network</code> uses the same <a href="#/hackconfig/machine">machine fields</a>.</p>
+
+<h2>Game</h2>
+<p>Only used at the top level.</p>
+<ul>
+    <li>target?: <code>string</code> or <code>false</code>
+        <ul><li>IP of the machine the player needs root access on. Defaults to the player's own machine. <code>false</code> = no target: the hack stays open until the player closes it.</li></ul></li>
+    <li>attempts?: <code>number</code>
+        <ul><li>Wrong passwords allowed in total across <code>ssh</code>, <code>rdp</code>, <code>su</code> and <code>sudo</code>. Defaults to <code>3</code>.</li></ul></li>
+    <li>network?: <code>HackMachine[]</code>
+        <ul><li>The other machines. Machines without an <code>ip</code> are ignored.</li></ul></li>
+    <li>commands?: <code>table&lt;string, function(source: number, args: string[])&gt;</code>
+        <ul><li>Your own terminal commands. They run on the server and return the lines to print (<code>string[]</code>, a <code>string</code> or <code>nil</code>). See <a href="#/guides/hacktype">Creating a Hack Type</a>.</li></ul></li>
+</ul>
+<pre data-lang="lua">commands = {
+    whoowns = function(source, args)
+        return ('%s belongs to Maria Holt'):format(args[1] or '?')
+    end,
+},</pre>
+
+<h2>Machine</h2>
+<p>Used at the top level and in every entry of <code>network</code>.</p>
+<ul>
+    <li>ip?: <code>string</code> or <code>string[]</code>
+        <ul><li>The machine's IPs. More than one IP puts the machine on several networks. Defaults to <code>'10.0.0.20'</code> for the player's own machine.</li></ul></li>
+    <li>host?: <code>string</code>
+        <ul><li>Hostname shown in the prompt, <code>hostname</code> and <code>nmap</code>. Defaults to <code>'pc'</code>.</li></ul></li>
+    <li>user?: <code>string</code>
+        <ul><li>The user the player logs in as. The home directory is <code>/home/&lt;user&gt;</code>. Defaults to <code>'user'</code>.</li></ul></li>
+    <li>password?: <code>string</code>
+        <ul><li>The user's password for <code>ssh</code> and <code>rdp</code>. Without it, no password is asked for.</li></ul></li>
+    <li>rootPassword?: <code>string</code>
+        <ul><li>Root password for <code>su</code> and <code>sudo</code>. Without it, the player becomes root without a password.</li></ul></li>
+    <li>desktop?: <code>'ubuntu'</code> or <code>'kali'</code> or <code>'chromeos'</code> or <code>'mint'</code> or <code>'fedora'</code> or <code>'macos'</code> or <code>'random'</code>
+        <ul><li>Graphical desktop, see <a href="#/guides/desktops">Desktops</a>. CLI only without it.</li></ul></li>
+    <li>ports?: <code>number[]</code>
+        <ul><li>Services the machine runs, e.g. <code>22</code> (ssh), <code>80</code> (http), <code>3306</code> (mysql), <code>5900</code> (remote desktop). Defaults to <code>{ 22 }</code>, plus the remote desktop port when the machine has a <code>desktop</code>.</li></ul></li>
+    <li>firewall?: <code>table</code>
+        <ul><li>See <a href="#/hackconfig/firewall">Firewall</a>. No firewall without it.</li></ul></li>
+    <li>processes?: <code>string[]</code>
+        <ul><li>Extra processes shown in <code>ps aux</code>, running as root.</li></ul></li>
+    <li>files?: <code>table&lt;string, string&gt;</code>
+        <ul><li>Your own files as <code>[path] = content</code>, see <a href="#/hackconfig/files">Files</a>.</li></ul></li>
+    <li>locked?: <code>string[]</code>
+        <ul><li>Extra paths only root can read, e.g. <code>{ '~/secret.txt' }</code>.</li></ul></li>
+    <li>onRoot?: <code>function(source: number, machine: HackMachine)</code>
+        <ul><li>Called on the server when the player gets root on this machine with the right password. Use it for rewards on machines that aren't the <code>target</code>.</li></ul></li>
+</ul>
+
+<h2>Firewall</h2>
+<ul>
+    <li>allow?: <code>string[]</code>
+        <ul><li>IPs that may do anything.</li></ul></li>
+    <li>open?: <code>number[]</code>
+        <ul><li>Ports anyone may use.</li></ul></li>
+    <li>ping?: <code>boolean</code>
+        <ul><li>Answer ping from anyone. Defaults to <code>false</code>.</li></ul></li>
+</ul>
+<p><code>firewall = {}</code> blocks everything from the outside. See <a href="#/guides/networking/firewall">Networking</a> for how traffic is checked.</p>
+
+<h2>Files</h2>
+<p>Every machine gets around 90 default Linux files, built with its own <code>user</code>, <code>host</code> and IPs. Your <code>files</code> are added on top.</p>
+<ul>
+    <li><code>~</code> is the machine's home directory. Absolute paths work too.</li>
+    <li>Directories are created automatically.</li>
+    <li>Files starting with <code>.</code> are hidden and only shown with <code>ls -a</code>.</li>
+    <li>Using the same path as a default file replaces it, e.g. <code>/etc/hosts</code> or <code>/opt/backup.sh</code>.</li>
+    <li>Contents are plain text. Use <code>\n</code> for new lines.</li>
+    <li>Files in <code>/var/www/html</code> are the machine's website when it has port <code>80</code>: <code>curl</code> and the browser app show them. See <a href="#/guides/website">Creating a Website</a>.</li>
+    <li>Image files (<code>.png</code>, <code>.jpg</code>, <code>.svg</code>, ...) are shown in the image viewer, see <a href="#/guides/desktops/images">Images</a>.</li>
+</ul>
+<p>By default only root can read <code>/root</code>, <code>/etc/shadow</code>, <code>/etc/sudoers</code>, <code>/var/backups/shadow.bak</code> and <code>~/.ssh/id_rsa</code>.</p>
+<p>The default files contain fake passwords to mislead players. <strong>Do not</strong> use these as real passwords:</p>
+<div class="table"><table>
+<thead><tr><th>Fake password</th><th>Found in</th></tr></thead>
+<tbody>
+<tr><td><code>toor</code></td><td><code>~/.bash_history</code></td></tr>
+<tr><td><code>Pa$$w0rd!</code></td><td><code>/var/www/html/config.php</code></td></tr>
+<tr><td><code>changeme</code></td><td><code>/opt/backup.sh</code></td></tr>
+<tr><td><code>summer2019</code>, <code>Football123</code>, <code>12345678</code></td><td><code>~/Documents/old_passwords.txt</code></td></tr>
+</tbody></table></div>
+
+<p><strong>Example</strong></p>
+<pre data-lang="lua">local config = {
+    -- The player's own machine
+    ip = '10.0.0.20',
+    host = 'workstation',
+    user = 'alex',
+    desktop = 'ubuntu',
+    files = {
+        ['/var/mail/alex'] = 'User: backup\nPassword: Secure2026',
+    },
+
+    -- Game
+    target = '192.168.1.5',
+    attempts = 5,
+
+    -- Other machines
+    network = {
+        {
+            ip = { '10.0.0.12', '192.168.1.10' },
+            host = 'backup-srv',
+            user = 'backup',
+            password = 'Secure2026',
+        },
+        {
+            ip = '192.168.1.5',
+            host = 'db-server',
+            user = 'dbadmin',
+            password = 'Tr0ll3y!',
+            rootPassword = 'Fjord#88',
+            ports = { 22, 3306 },
+            firewall = { allow = { '192.168.1.10' } },
+        },
+    },
+}</pre>
+</article>
+
+<!-- =====================================================================
+     Functions / Client
+     ===================================================================== -->
+<article data-page="functions/client" data-crumb="LC Hack / Functions" hidden>
+<h1>Client</h1>
+<p>Hacks are always started by the server, see <a href="#/functions/server">Server</a>. The client can only check and close the terminal.</p>
+
+<h2>isOpen</h2>
+<p>Checks if the hack terminal is open.</p>
+<pre data-lang="lua">exports.lc_hack:isOpen()</pre>
+<p>Return:</p>
+<ul><li><code>boolean</code> - Returns <code>true</code> if the terminal is open, otherwise <code>false</code>.</li></ul>
+<p><strong>Example</strong></p>
+<pre data-lang="lua">if exports.lc_hack:isOpen() then return end</pre>
+
+<h2>close</h2>
+<p>Closes the terminal, like pressing <code>Escape</code>. A hack from a terminal is paused, a hack from <code>startHack</code> counts as a failure.</p>
+<pre data-lang="lua">exports.lc_hack:close()</pre>
+</article>
+
+<!-- =====================================================================
+     Functions / Server
+     ===================================================================== -->
+<article data-page="functions/server" data-crumb="LC Hack / Functions" hidden>
+<h1>Server</h1>
+<p>All server exports take a <a href="#/hackconfig">HackConfig</a>. They throw an error on invalid types, e.g. <code>expected data.coords to have type 'vector3' (received nil)</code>.</p>
+
+<h2>createTerminal</h2>
+<p>Creates a new hack terminal in the world. With ox_target it becomes a sphere zone, otherwise an ox_lib point with <code>[E]</code>.</p>
+<pre data-lang="lua">exports.lc_hack:createTerminal(data)</pre>
+<ul>
+    <li>data: <code>table</code>
+        <ul>
+            <li>coords?: <code>vector3</code>
+                <ul><li>Where the terminal is. Can be left out when <code>screen</code> is set: the terminal and its target zone are then placed on the screen.</li></ul></li>
+            <li>config: <code>HackConfig</code></li>
+            <li>name?: <code>string</code>
+                <ul><li>An optional name to refer to the terminal instead of using the <code>id</code>. Using the same name again replaces the old terminal.</li></ul></li>
+            <li>label?: <code>string</code>
+                <ul><li>Text shown by ox_target or the <code>[E]</code> prompt. Defaults to <code>'Hack terminal'</code>.</li></ul></li>
+            <li>radius?: <code>number</code>
+                <ul><li>How close the player has to be. Defaults to <code>1.5</code>, or half the screen's width when the terminal sits on a screen.</li></ul></li>
+            <li>screen?: <code>table</code>
+                <ul><li>An in-world screen that shows the hacker's terminal to everyone nearby, see <a href="#/guides/screens">Screens</a>.</li></ul>
+                <ul>
+                    <li>coords: <code>vector3</code>
+                        <ul><li>The center of the screen.</li></ul></li>
+                    <li>heading?: <code>number</code>
+                        <ul><li>The heading of a player standing in front of the screen and looking at it. Defaults to <code>0.0</code>.</li></ul></li>
+                    <li>width?: <code>number</code>
+                        <ul><li>Width in meters. Defaults to <code>1.0</code>.</li></ul></li>
+                    <li>height?: <code>number</code>
+                        <ul><li>Height in meters. Defaults to <code>width * 9 / 16</code>.</li></ul></li>
+                    <li>distance?: <code>number</code>
+                        <ul><li>How far away the screen is drawn. Defaults to <code>15.0</code>.</li></ul></li>
+                </ul></li>
+            <li>onSuccess?: <code>function(source: number, id: number | string)</code>
+                <ul><li>Called when the player gets root on the target. <code>id</code> is the <code>name</code> if one was set.</li></ul></li>
+            <li>onFail?: <code>function(source: number, id: number | string)</code>
+                <ul><li>Called on too many wrong passwords, when the player walks away from a closed terminal (see <code>keepDistance</code>) or drops.</li></ul></li>
+            <li>keepDistance?: <code>number</code>
+                <ul><li>Closing the terminal pauses the hack: logins, files, history and attempts are kept, and the player continues where they left off when they use it again. The paused hack is discarded once the player is further away than this. Defaults to <code>10.0</code>.</li></ul></li>
+        </ul>
+    </li>
+</ul>
+<p>Return:</p>
+<ul><li>id: <code>number</code></li></ul>
+<p>Terminals are removed automatically when the resource that created them stops. Several players can use the same terminal at the same time, each in their own hack.</p>
+<p><strong>Example</strong></p>
+<pre data-lang="lua">exports.lc_hack:createTerminal({
+    name = 'bank_server',
+    coords = vec3(253.1, 228.4, 101.7),
+    label = 'Use server',
+    screen = {
+        coords = vec3(252.4, 229.6, 102.4),
+        heading = 340.0,
+        width = 1.2,
+    },
+    config = {
+        user = 'teller',
+        desktop = 'macos',
+        target = '10.1.0.10',
+        network = {
+            { ip = '10.1.0.10', host = 'bank-core', user = 'ops', password = 'Vault#2026', rootPassword = 'Valv-7781' },
+        },
+    },
+    onSuccess = function(source, id)
+        -- reward the player, open a door, etc.
+    end,
+    onFail = function(source, id)
+        -- trigger an alarm, etc.
+    end,
+})</pre>
+
+<h2>removeTerminal</h2>
+<p>Removes a terminal.</p>
+<pre data-lang="lua">exports.lc_hack:removeTerminal(id)</pre>
+<ul>
+    <li>id: <code>number</code> or <code>string</code>
+        <ul><li>The id returned by <code>createTerminal</code>, or the terminal's <code>name</code>.</li></ul></li>
+</ul>
+<p>Return:</p>
+<ul><li><code>boolean</code> - Returns <code>true</code> if a terminal was removed.</li></ul>
+
+<h2>terminalExists</h2>
+<p>Checks if a terminal exists.</p>
+<pre data-lang="lua">exports.lc_hack:terminalExists(id)</pre>
+<ul><li>id: <code>number</code> or <code>string</code></li></ul>
+<p>Return:</p>
+<ul><li><code>boolean</code> - Returns <code>true</code> if the terminal exists, otherwise <code>false</code>.</li></ul>
+
+<h2>startHack</h2>
+<p>Opens a hack directly on a player, without a terminal. Useful for items and jobs.</p>
+<pre data-lang="lua">exports.lc_hack:startHack(source, config, cb)</pre>
+<ul>
+    <li>source: <code>number</code></li>
+    <li>config: <code>HackConfig</code></li>
+    <li>cb?: <code>function(success: boolean)</code>
+        <ul><li>Called when the hack ends.</li></ul></li>
+</ul>
+<p>Return:</p>
+<ul><li>started: <code>boolean</code> - <code>false</code> if the player is already hacking.</li></ul>
+<p><strong>Example</strong></p>
+<pre data-lang="lua">exports.lc_hack:startHack(source, config, function(success)
+    if success then
+        -- reward the player
+    end
+end)</pre>
+
+<h2>stopHack</h2>
+<p>Stops the player's hack and closes the terminal. Counts as a failure, so <code>cb(false)</code> or <code>onFail</code> is called.</p>
+<pre data-lang="lua">exports.lc_hack:stopHack(source)</pre>
+<ul><li>source: <code>number</code></li></ul>
+
+<h2>addMachine</h2>
+<p>Adds a machine to the player's running hack, e.g. a device found with one of your <a href="#/hackconfig/game">commands</a>. Its passwords stay on the server, like in a HackConfig.</p>
+<pre data-lang="lua">exports.lc_hack:addMachine(source, machine)</pre>
+<ul>
+    <li>source: <code>number</code></li>
+    <li>machine: <code>HackMachine</code>
+        <ul><li>The same fields as a <a href="#/hackconfig/machine">machine</a>. <code>ip</code> is required; use an IP on a network the player can reach.</li></ul></li>
+</ul>
+<p>Return:</p>
+<ul><li><code>boolean</code> - Returns <code>false</code> if the player isn't hacking.</li></ul>
+<p><strong>Example</strong></p>
+<pre data-lang="lua">exports.lc_hack:addMachine(source, {
+    ip = '172.20.0.2',
+    host = 'Phone-8c13',
+    user = 'mobile',
+    rootPassword = '4821',
+    files = { ['~/Notes/reminders.txt'] = 'New phone PIN: 4821' },
+    onRoot = function(source)
+        exports.ox_inventory:AddItem(source, 'phone_data', 1)
+    end,
+})</pre>
+
+<h2>isHacking</h2>
+<p>Checks if a player is currently hacking.</p>
+<pre data-lang="lua">exports.lc_hack:isHacking(source)</pre>
+<ul><li>source: <code>number</code></li></ul>
+<p>Return:</p>
+<ul><li><code>boolean</code> - Returns <code>true</code> if the player is hacking, otherwise <code>false</code>.</li></ul>
+
+<h2>registerGame</h2>
+<p>Registers a minigame with the core. Minigame resources call this once when they start and ship their own UI. The <code>check</code> function runs on the server for every guess, so the answer never has to leave the server. See <a href="#/guides/examples/your-own-minigame">Your own minigame</a>.</p>
+<pre data-lang="lua">exports.lc_hack:registerGame(name, data)</pre>
+<ul>
+    <li>name: <code>string</code></li>
+    <li>data: <code>table</code>
+        <ul>
+            <li>check: <code>function(secret: any, guess: any): { correct: boolean, feedback?: any }</code>
+                <ul><li>Compares a guess with the secret. <code>feedback</code> is sent back to the UI.</li></ul></li>
+        </ul>
+    </li>
+</ul>
+<p>Registered games are removed when their resource stops. Register again on <code>onResourceStart</code> for <code>lc_hack</code>, since a restart of the core forgets them.</p>
+<p><strong>Example</strong></p>
+<pre data-lang="lua">exports.lc_hack:registerGame('pincode', {
+    check = function(pin, guess)
+        return { correct = guess == pin, feedback = #guess }
+    end,
+})</pre>
+
+<h2>startGame</h2>
+<p>Starts a registered minigame for a player. The core counts attempts, enforces the time limit and calls <code>cb</code> when the game ends.</p>
+<pre data-lang="lua">exports.lc_hack:startGame(source, name, options, cb)</pre>
+<ul>
+    <li>source: <code>number</code></li>
+    <li>name: <code>string</code></li>
+    <li>options: <code>table</code>
+        <ul>
+            <li>secret: <code>any</code>
+                <ul><li>The answer. Stays on the server.</li></ul></li>
+            <li>data?: <code>table</code>
+                <ul><li>Sent to the minigame UI.</li></ul></li>
+            <li>attempts?: <code>number</code>
+                <ul><li>Wrong guesses allowed. Defaults to <code>3</code>.</li></ul></li>
+            <li>time?: <code>number</code>
+                <ul><li>Time limit in seconds.</li></ul></li>
+        </ul>
+    </li>
+    <li>cb?: <code>function(success: boolean)</code></li>
+</ul>
+<p>Return:</p>
+<ul><li>started: <code>boolean</code> - <code>false</code> if the player is busy (in a hack or another game) or the game isn't registered.</li></ul>
+
+<h2>stopGame</h2>
+<p>Stops the player's minigame and closes its UI. Counts as a failure.</p>
+<pre data-lang="lua">exports.lc_hack:stopGame(source)</pre>
+<ul><li>source: <code>number</code></li></ul>
+
+<h2>isPlaying</h2>
+<p>Checks if a player is in a minigame.</p>
+<pre data-lang="lua">exports.lc_hack:isPlaying(source)</pre>
+<ul><li>source: <code>number</code></li></ul>
+<p>Return:</p>
+<ul><li><code>boolean</code> - Returns <code>true</code> if the player is in a minigame, otherwise <code>false</code>.</li></ul>
+</article>
+
+<!-- =====================================================================
+     Events
+     ===================================================================== -->
+<article data-page="events" data-crumb="LC Hack" hidden>
+<h1>Events</h1>
+<p>lc_hack doesn't trigger events for other resources. Use the callbacks of the exports to react when a hack ends; they run on the server and can't be faked by a client.</p>
+
+<h2>Callbacks</h2>
+<div class="table"><table>
+<thead><tr><th>Callback</th><th>From</th><th>Called when</th></tr></thead>
+<tbody>
+<tr><td><code>onSuccess(source, id)</code></td><td><a href="#/functions/server/createterminal">createTerminal</a></td><td>The player got root on the <code>target</code>.</td></tr>
+<tr><td><code>onFail(source, id)</code></td><td><a href="#/functions/server/createterminal">createTerminal</a></td><td>Too many wrong passwords, the player walked away from a paused terminal, dropped, or <code>stopHack</code> was called.</td></tr>
+<tr><td><code>cb(success)</code></td><td><a href="#/functions/server/starthack">startHack</a></td><td>The hack ended. Closing the window counts as a failure.</td></tr>
+<tr><td><code>onRoot(source, machine)</code></td><td><a href="#/hackconfig/machine">a machine</a></td><td>The player got root on that machine.</td></tr>
+<tr><td><code>commands[name](source, args)</code></td><td><a href="#/hackconfig/game">HackConfig</a></td><td>The player ran your command. Return the lines to print.</td></tr>
+<tr><td><code>cb(success, ...)</code></td><td><a href="#/functions/server/startgame">startGame</a></td><td>The minigame ended.</td></tr>
+</tbody></table></div>
+<p>Errors in a callback are caught and printed, so they never break lc_hack.</p>
+<pre data-lang="lua">exports.lc_hack:createTerminal({
+    coords = vec3(253.1, 228.4, 101.7),
+    config = config,
+    onSuccess = function(source, id)
+        TriggerEvent('my_heist:hacked', source, id) -- trigger your own event if you need one
+    end,
+})</pre>
+
+<h2>Internal events</h2>
+<p>Used between the lc_hack client and server. They are listed for debugging; don't trigger them yourself. Every event from a client is checked on the server.</p>
+<div class="table"><table>
+<thead><tr><th>Name</th><th>Type</th><th>Direction</th><th>Data</th></tr></thead>
+<tbody>
+<tr><td><code>lc_hack:open</code></td><td>event</td><td>server to client</td><td>The config without passwords</td></tr>
+<tr><td><code>lc_hack:close</code></td><td>event</td><td>server to client</td><td>Closes the terminal (<code>stopHack</code>)</td></tr>
+<tr><td><code>lc_hack:addTerminal</code></td><td>event</td><td>server to client</td><td><code>{ id, coords, label, radius, screen }</code></td></tr>
+<tr><td><code>lc_hack:removeTerminal</code></td><td>event</td><td>server to client</td><td><code>id</code></td></tr>
+<tr><td><code>lc_hack:use</code></td><td>event</td><td>client to server</td><td>Terminal <code>id</code>; the server checks the distance</td></tr>
+<tr><td><code>lc_hack:stop</code></td><td>event</td><td>client to server</td><td>The player closed the window: pauses a terminal hack, ends a <code>startHack</code> hack</td></tr>
+<tr><td><code>lc_hack:discard</code></td><td>event</td><td>server to client</td><td><code>terminalId</code>: the player walked away, forget the saved state</td></tr>
+<tr><td><code>lc_hack:verify</code></td><td>ox_lib callback</td><td>client to server</td><td><code>{ machine, kind, user, value }</code>, returns <code>{ ok, win, lost, attempts }</code></td></tr>
+<tr><td><code>lc_hack:getTerminals</code></td><td>ox_lib callback</td><td>client to server</td><td>Every terminal, fetched on join</td></tr>
+<tr><td><code>lc_hack:mirror</code></td><td>latent event</td><td>client to server</td><td><code>{ html, width, height }</code> from the hacker</td></tr>
+<tr><td><code>lc_hack:mirror</code></td><td>latent event</td><td>server to client</td><td><code>id, state</code> to players near the screen, <code>false</code> = idle</td></tr>
+<tr><td><code>lc_hack:getMirror</code></td><td>ox_lib callback</td><td>client to server</td><td>The current screen state when a player gets close</td></tr>
+<tr><td><code>lc_hack:command</code></td><td>ox_lib callback</td><td>client to server</td><td><code>name, args</code>: runs a command from <code>config.commands</code>, returns the lines</td></tr>
+<tr><td><code>lc_hack:addMachine</code></td><td>event</td><td>server to client</td><td>A machine without passwords (<code>addMachine</code>)</td></tr>
+<tr><td><code>lc_hack:serverFiles</code></td><td>latent event</td><td>client to server</td><td><code>{ machine, ops }</code>: file changes on a server from <a href="#/config">config.lua</a></td></tr>
+<tr><td><code>lc_hack:serverFiles</code></td><td>latent event</td><td>server to client</td><td><code>ip, ops</code>: another player's changes, to everyone in a hack</td></tr>
+</tbody></table></div>
+<ul>
+    <li><code>machine</code> is the machine's index: <code>1</code> is the player's own, then <code>network</code> in order, then the servers from <code>config.lua</code>.</li>
+    <li><code>kind</code> is <code>'login'</code> (<code>ssh</code>, <code>rdp</code>) or <code>'root'</code> (<code>su</code>, <code>sudo</code>). Root is only accepted on a machine the player logged in to.</li>
+    <li><code>ops</code> is a list of <code>{ op = 'write' | 'mkdir' | 'delete', path, content? }</code>.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Guides / Creating a Hack
+     ===================================================================== -->
+<article data-page="guides/hack" data-crumb="LC Hack / Guides" hidden>
+<h1>Creating a Hack</h1>
+<p>A hack is a small puzzle. The player starts on their own machine, follows clues from machine to machine and wins with root on the target. This guide builds one from scratch: the player breaks into the CEO's laptop through an office network.</p>
+<p>The finished config is at the <a href="#/guides/hack/the-finished-hack">bottom of the page</a>.</p>
+
+<div class="steps">
+<h3>Plan the path</h3>
+<p>Write the path down before any code, starting from the target and working backwards. Every step needs a clue the player can find on the machine before it.</p>
+<div class="table"><table>
+<thead><tr><th>#</th><th>The player is on</th><th>Finds</th><th>Which leads to</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>workstation (own)</td><td>A mail from IT about the intranet</td><td><code>curl intranet</code></td></tr>
+<tr><td>2</td><td>workstation</td><td>The intranet page, with a login in an HTML comment</td><td><code>ssh files@10.0.0.15</code></td></tr>
+<tr><td>3</td><td>fileserver</td><td>A backup script with the CEO's password</td><td><code>ssh ceo@192.168.5.2</code></td></tr>
+<tr><td>4</td><td>ceo-laptop (target)</td><td>The root password in <code>.bash_history</code></td><td><code>su</code>: the player wins</td></tr>
+</tbody></table></div>
+<p>Three or four hops take most players 5 to 10 minutes. Keep the first clue easy to find, e.g. in <code>/var/mail/&lt;user&gt;</code> or on the desktop.</p>
+
+<h3>Create the player's own machine</h3>
+<p>The top level of the <a href="#/hackconfig">HackConfig</a> is the machine the player starts on. Give it the first clue.</p>
+<pre data-lang="lua">local config = {
+    ip = '10.0.0.20',
+    host = 'workstation',
+    user = 'alex',
+    desktop = 'macos',
+    files = {
+        ['/var/mail/alex'] = 'From: it@office.local\nSubject: New intranet\n\nThe intranet is up at http://intranet',
+        ['/etc/hosts'] = '127.0.0.1\tlocalhost\n10.0.0.30\tintranet',
+    },
+}</pre>
+<p><code>/etc/hosts</code> makes the name <code>intranet</code> work on this machine. Leave out <code>desktop</code> for a terminal only.</p>
+
+<h3>Add the other machines</h3>
+<p>Every machine in <code>network</code> has an IP, a user and the clue for the next step. <code>password</code> is asked for on <code>ssh</code>; it never leaves the server.</p>
+<pre data-lang="lua">network = {
+    {   -- The intranet: only a website, port 80
+        ip = '10.0.0.30',
+        host = 'intranet',
+        ports = { 80 },
+        files = {
+            ['/var/www/html/index.html'] = '&lt;h1&gt;Office intranet&lt;/h1&gt;&lt;!-- fileserver 10.0.0.15, user files / Arch1ve! --&gt;',
+        },
+    },
+    {   -- The file server sits on both networks, so the player hops through it
+        ip = { '10.0.0.15', '192.168.5.10' },
+        host = 'fileserver',
+        user = 'files',
+        password = 'Arch1ve!',
+        files = {
+            ['/opt/sync.sh'] = '#!/bin/bash\n# sync the CEO laptop\nsshpass -p "Cl0udy-Day" rsync ceo@192.168.5.2:~/ /srv/backup/',
+        },
+    },
+    {   -- The target
+        ip = '192.168.5.2',
+        host = 'ceo-laptop',
+        user = 'ceo',
+        password = 'Cl0udy-Day',
+        rootPassword = 'R00t!Lap',
+        files = {
+            ['~/.bash_history'] = 'ls\nsudo -s\nR00t!Lap\nexit',
+        },
+    },
+},</pre>
+
+<h3>Choose the target and attempts</h3>
+<p><code>target</code> is the IP the player needs root on. <code>attempts</code> is the number of wrong passwords allowed in the whole hack.</p>
+<pre data-lang="lua">target = '192.168.5.2',
+attempts = 5,</pre>
+
+<h3>Make the player work for it</h3>
+<ul>
+    <li><strong>Networks.</strong> <code>192.168.5.x</code> can only be reached from a machine with an IP on it, so the player has to go through the file server. See <a href="#/guides/networking">Networking</a>.</li>
+    <li><strong>Firewalls.</strong> <code>firewall = { allow = { '192.168.5.10' } }</code> on the laptop lets only the file server in, even if the player finds another route.</li>
+    <li><strong>Decoys.</strong> Every machine already has around 90 files with <a href="#/hackconfig/files">fake passwords</a>. Add your own: an old password in <code>~/notes.txt</code> costs a careless player an attempt.</li>
+    <li><strong>Locked files.</strong> <code>locked = { '~/secret.txt' }</code> makes a file readable only after <code>su</code>.</li>
+</ul>
+
+<h3>Test it in the browser</h3>
+<p>Save the config in a file that returns it, e.g. <code>my_heist/hacks/office.lua</code> ending with <code>return config</code>, or write it as <code>return { ... }</code>. Run a web server in your <code>resources</code> folder and open it in the browser:</p>
+<pre data-lang="cfg">cd resources
+python3 -m http.server 8000
+# http://localhost:8000/lc_hack/web/?hack=../my_heist/hacks/office.lua</pre>
+<p>Play it through. The browser console prints <code>[lc_hack] win</code> or <code>lost</code>. Add <code>&amp;desktop=none</code> to test without a desktop.</p>
+<div class="callout"><i class="fa-solid fa-circle-info"></i><div><p>The test mode reads the file as plain data, so the hack must be one table without function calls. <code>vec3</code> and variables work in FiveM but not here.</p></div></div>
+
+<h3>Put it in the world</h3>
+<p>Load the config in your resource and create a terminal, or start the hack from an item with <a href="#/functions/server/starthack">startHack</a>.</p>
+<pre data-lang="lua">local config = require 'hacks.office'
+
+exports.lc_hack:createTerminal({
+    name = 'office_pc',
+    coords = vec3(-1062.1, -246.0, 44.3),
+    label = 'Use computer',
+    config = config,
+    onSuccess = function(source)
+        exports.ox_inventory:AddItem(source, 'usb_ceo', 1)
+    end,
+})</pre>
+<p>Add <code>'hacks/office.lua'</code> to <code>files</code> in your <code>fxmanifest.lua</code> only if a client needs it; <code>require</code> on the server reads it directly.</p>
+</div>
+
+<h2>The finished hack</h2>
+<pre data-lang="lua">return {
+    ip = '10.0.0.20',
+    host = 'workstation',
+    user = 'alex',
+    desktop = 'macos',
+    target = '192.168.5.2',
+    attempts = 5,
+    files = {
+        ['/var/mail/alex'] = 'From: it@office.local\nSubject: New intranet\n\nThe intranet is up at http://intranet',
+        ['/etc/hosts'] = '127.0.0.1\tlocalhost\n10.0.0.30\tintranet',
+    },
+    network = {
+        {
+            ip = '10.0.0.30',
+            host = 'intranet',
+            ports = { 80 },
+            files = {
+                ['/var/www/html/index.html'] = '&lt;h1&gt;Office intranet&lt;/h1&gt;&lt;!-- fileserver 10.0.0.15, user files / Arch1ve! --&gt;',
+            },
+        },
+        {
+            ip = { '10.0.0.15', '192.168.5.10' },
+            host = 'fileserver',
+            user = 'files',
+            password = 'Arch1ve!',
+            files = {
+                ['/opt/sync.sh'] = '#!/bin/bash\n# sync the CEO laptop\nsshpass -p "Cl0udy-Day" rsync ceo@192.168.5.2:~/ /srv/backup/',
+            },
+        },
+        {
+            ip = '192.168.5.2',
+            host = 'ceo-laptop',
+            user = 'ceo',
+            password = 'Cl0udy-Day',
+            rootPassword = 'R00t!Lap',
+            firewall = { allow = { '192.168.5.10' } },
+            files = {
+                ['~/.bash_history'] = 'ls\nsudo -s\nR00t!Lap\nexit',
+            },
+        },
+    },
+}</pre>
+<p>The solution: <code>cat /var/mail/alex</code>, <code>curl intranet</code>, <code>ssh files@10.0.0.15</code>, <code>cat /opt/sync.sh</code>, <code>ssh ceo@192.168.5.2</code>, <code>cat ~/.bash_history</code>, <code>su</code>.</p>
+</article>
+
+<!-- =====================================================================
+     Guides / Creating a Website
+     ===================================================================== -->
+<article data-page="guides/website" data-crumb="LC Hack / Guides" hidden>
+<h1>Creating a Website</h1>
+<p>Websites live on servers from <a href="#/config">config.lua</a>. They are always on, every player can open them in the browser app or with <code>curl</code>, and players can change them in game.</p>
+
+<img class="shot" src="images/lc_hack/website.png" alt="northbank.com in Safari" loading="lazy">
+
+<div class="steps">
+<h3>Add a server</h3>
+<p>Add a server with a <code>website</code> folder to <code>config.lua</code>.</p>
+<pre data-lang="lua">servers = {
+    {
+        ip = '82.103.40.12',
+        host = 'northbank-web',
+        user = 'webadmin',
+        password = 'N0rth!Web',
+        website = 'websites/northbank',
+    },
+},</pre>
+
+<h3>Give it a name</h3>
+<pre data-lang="lua">dns = {
+    ['northbank.com'] = '82.103.40.12',
+},</pre>
+
+<h3>Create the website</h3>
+<p>Put the files in the folder. Loading starts at <code>index.html</code>, and every page, stylesheet and image it links to is loaded, up to 200 files.</p>
+<pre data-lang="cfg">websites/northbank/
+    index.html
+    about.html
+    style.css
+    img/logo.svg
+    careers/index.html</pre>
+<pre data-lang="html">&lt;link rel="stylesheet" href="style.css"&gt;
+&lt;img src="img/logo.svg"&gt;
+&lt;a href="about.html"&gt;About us&lt;/a&gt;
+&lt;a href="careers/"&gt;Careers&lt;/a&gt;</pre>
+<ul>
+    <li>Use relative links or links from the site's root (<code>/about.html</code>). A link to a folder opens its <code>index.html</code>.</li>
+    <li>Images can be <code>.png</code>, <code>.jpg</code>, <code>.gif</code>, <code>.webp</code> or <code>.svg</code>.</li>
+    <li>Pages that nothing links to are not loaded. A missing file prints a warning in the server console.</li>
+</ul>
+
+<h3>Open it</h3>
+<p>Restart lc_hack and open <code>northbank.com</code> in the browser app, or run <code>curl northbank.com/about.html</code>. In the <a href="#/guides/development/testing-in-the-browser">browser test mode</a> the website is loaded from the folder as well.</p>
+</div>
+
+<h2>Static only</h2>
+<p>Websites are static: HTML, CSS and images. Scripts and forms never run, and a page can never load anything from outside, not even fonts or images from another site. That keeps players safe from pages other players made.</p>
+
+<h2>Building in game</h2>
+<p>Players change a website by logging in to the server and editing the files in <code>/var/www/html</code>, with the text editor, <code>echo &gt;</code>, <code>touch</code>, <code>mkdir</code>, <code>rm</code> and <code>mv</code>.</p>
+<pre data-lang="cfg">ssh webadmin@northbank.com
+mkdir /var/www/html/blog
+echo "&lt;h1&gt;My blog&lt;/h1&gt;" &gt; /var/www/html/blog/index.html</pre>
+<ul>
+    <li>The game server checks every change: the player must have logged in to the server in that hack. The server's user can write in its home, <code>/tmp</code> and <code>/var/www/html</code>; root everywhere.</li>
+    <li>Changes are saved and every other player in a hack sees them right away. They stay after a restart, see <a href="#/config/saved-changes">Saved changes</a>.</li>
+    <li><code>website = true</code> gives a server an empty website to build from scratch.</li>
+    <li>Limits: 100 KB per file, 500 files and folders written per server. Images can't be web addresses.</li>
+</ul>
+
+<h2>Websites in a hack</h2>
+<p>A website is a good first clue. Give a name to the server, let the player find the name in a mail, and hide the next step on the site:</p>
+<ul>
+    <li>An HTML comment: players who use <code>curl</code> see it, the browser hides it.</li>
+    <li>A page only linked from an HTML comment, e.g. <code>&lt;!-- &lt;a href="admin.html"&gt;old admin&lt;/a&gt; --&gt;</code>. It is loaded, but only players who read the source find it.</li>
+    <li>Staff names on an "about" page, used as usernames somewhere else.</li>
+</ul>
+<div class="callout warning"><i class="fa-solid fa-triangle-exclamation"></i><div><p>Everything on a website can be read by every player. Hide hints there, never real secrets.</p></div></div>
+</article>
+
+<!-- =====================================================================
+     Guides / Creating a Hack Type
+     ===================================================================== -->
+<article data-page="guides/hacktype" data-crumb="LC Hack / Guides" hidden>
+<h1>Creating a Hack Type</h1>
+<p>lc_hack is the core: the terminal, the desktops, machines, files and the server-side checks. Hack types are separate resources that build on it, e.g. hacking an ATM or the phones of people nearby. This guide shows the three building blocks, using <a href="#~/lc_phonehack">LC Phonehack</a> as the example.</p>
+
+<div class="table"><table>
+<thead><tr><th>Building block</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><a href="#/hackconfig/game"><code>commands</code></a></td><td>Your own terminal commands. They run on the server, in your resource.</td></tr>
+<tr><td><a href="#/functions/server/addmachine"><code>addMachine</code></a></td><td>Adds a machine to a running hack, e.g. a device a command found.</td></tr>
+<tr><td><a href="#/hackconfig/machine"><code>onRoot</code></a></td><td>Called on the server when the player gets root on a machine. Give the reward here.</td></tr>
+</tbody></table></div>
+<p>Add <code>target = false</code> for a hack without a goal: it stays open until the player closes it, so they can hack one device after the other.</p>
+
+<div class="steps">
+<h3>Open a hack with your own commands</h3>
+<p>Start a hack from your resource, e.g. when a player uses an item. Every function in <code>commands</code> becomes a command in the terminal, with Tab completion and a line in <code>help</code>.</p>
+<pre data-lang="lua">exports.lc_hack:startHack(source, {
+    ip = '172.20.0.1',
+    host = 'laptop',
+    user = 'user',
+    desktop = 'kali',
+    target = false,
+    commands = {
+        scan = function(source, args)
+            return { 'ID  DEVICE', '1   Phone-8c13' }
+        end,
+    },
+})</pre>
+<p>A command gets the player and the words after it, and returns the lines to print: a table of strings, one string or nothing. Errors in it are caught and printed in the server console.</p>
+
+<h3>Add machines while the player hacks</h3>
+<p>Create a machine when the player finds something. It takes the same fields as a <a href="#/hackconfig/machine">machine</a> in a HackConfig, and its passwords stay on the server.</p>
+<pre data-lang="lua">connect = function(source, args)
+    exports.lc_hack:addMachine(source, {
+        ip = '172.20.0.2', -- On the laptop's network, so the player can ssh to it
+        host = 'Phone-8c13',
+        user = 'mobile',
+        rootPassword = '4821',
+        files = { ['~/Notes/reminders.txt'] = 'New phone PIN: 4821' },
+    })
+    return 'Connected. Log in with: ssh mobile@172.20.0.2'
+end,</pre>
+
+<h3>Reward the player</h3>
+<p><code>onRoot</code> runs on the server when the player becomes root on the machine with the right password. Check what you need again before you give anything: the player may have walked away.</p>
+<pre data-lang="lua">onRoot = function(source, machine)
+    exports.ox_inventory:AddItem(source, 'phone_data', 1)
+end,</pre>
+
+<h3>Validate everything on the server</h3>
+<ul>
+    <li>Arguments come from the player. Check them: <code>tonumber(args[1])</code>, ranges, cooldowns.</li>
+    <li>Check the world on the server: does the NPC still exist, is the player close to it?</li>
+    <li>Give rewards in <code>onRoot</code> or <a href="#/events">callbacks</a>, never because the client said so.</li>
+</ul>
+</div>
+
+<h2>lc_phonehack</h2>
+<p>A complete hack type in two small files. The player opens a laptop, <code>scan</code> lists the phones of NPCs nearby, <code>connect</code> adds one as a machine, and the player finds the phone's PIN in its files and uses it with <code>su</code>.</p>
+<ul>
+    <li>Source and setup: <a href="#~/lc_phonehack">LC Phonehack documentation</a> and <a href="https://github.com/LAURIDS0/lc_phonehack" target="_blank" rel="noopener">GitHub</a></li>
+    <li>Works with ox_inventory (an item opens the laptop and the reward is an item) and without it (a command and a callback).</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Guides / Examples
+     ===================================================================== -->
+<article data-page="guides/examples" data-crumb="LC Hack / Guides" hidden>
+<h1>Examples</h1>
+<p>Complete setups you can copy into your own resource.</p>
+
+<h2>Hack from an item</h2>
+<p>Start a hack when a player uses an item. The item calls a server export in your resource. <code>consume = 0</code> and returning <code>false</code> keep the item.</p>
+<pre data-lang="lua">-- ox_inventory/data/items.lua
+['hacking_laptop'] = {
+    label = 'Hacking Laptop',
+    weight = 1500,
+    stack = false,
+    consume = 0,
+    server = { export = 'my_heist.useLaptop' },
+},</pre>
+<pre data-lang="lua">-- my_heist/server.lua
+exports('useLaptop', function(event, item, inventory)
+    if event ~= 'usingItem' then return end
+    local source = inventory.id
+
+    local started = exports.lc_hack:startHack(source, config, function(success)
+        if success then
+            exports.ox_inventory:AddItem(source, 'money', 5000)
+        end
+    end)
+
+    if not started then
+        TriggerClientEvent('ox_lib:notify', source, { type = 'error', description = 'You are busy.' })
+    end
+    return false
+end)</pre>
+
+<h2>Terminal on a monitor</h2>
+<p>A terminal that sits on a monitor, so players use ox_target on the screen itself and everyone nearby can watch. Leave out <code>coords</code> to place the terminal on the screen.</p>
+<pre data-lang="lua">exports.lc_hack:createTerminal({
+    name = 'office_pc',
+    label = 'Use computer',
+    screen = {
+        coords = vec3(-1061.34, -249.11, 44.58), -- the center of the monitor
+        heading = 93.4,                         -- your heading while looking at it
+        width = 0.55,
+        height = 0.31,
+    },
+    keepDistance = 15.0, -- players can walk to another computer and come back
+    config = config,
+    onSuccess = function(source)
+        TriggerEvent('my_heist:nextStage', source)
+    end,
+})</pre>
+
+<h2>Heist network</h2>
+<p>A network where the player has to hop through a server on two networks to reach a target behind a firewall. The comments show the solution.</p>
+<pre data-lang="lua">local config = {
+    -- The player's workstation
+    ip = '10.10.1.11',
+    host = 'ws01',
+    user = 'kreed',
+    desktop = 'ubuntu',
+    target = '10.10.20.50',
+    attempts = 5,
+    files = {
+        -- 1. The mail has the login for the core server
+        ['/var/mail/kreed'] = 'User: sysadmin\nPassword: Inv4der!2026',
+        ['/etc/hosts'] = '127.0.0.1\tlocalhost\n10.10.1.5\tcore',
+    },
+
+    network = {
+        {   -- 2. ssh sysadmin@core: it sits on both networks
+            ip = { '10.10.1.5', '10.10.20.5' },
+            host = 'core',
+            user = 'sysadmin',
+            password = 'Inv4der!2026',
+            files = {
+                ['/etc/hosts'] = '127.0.0.1\tlocalhost\n10.10.20.50\tdata',
+                -- 3. The backup script has the login for the data server
+                ['/opt/backup/sync.sh'] = 'DATA_USER=dataops\nDATA_PASS=Lif3D4ta$',
+            },
+        },
+        {   -- 4. rdp dataops@data from core, then ps aux and base64 -d the key, then su
+            ip = '10.10.20.50',
+            host = 'data',
+            user = 'dataops',
+            password = 'Lif3D4ta$',
+            rootPassword = 'L1feInv4der#Root',
+            desktop = 'ubuntu',
+            ports = { 22, 5900 },
+            firewall = { allow = { '10.10.20.5' } }, -- only core may connect
+            processes = { '/usr/bin/mongod --keyFile-pass=TDFmZUludjRkZXIjUm9vdA==' },
+        },
+        {   -- A decoy: no ping, only a web page
+            ip = '10.10.1.30',
+            host = 'intranet',
+            ports = { 80 },
+            firewall = { open = { 80 } },
+            files = { ['/var/www/html/index.html'] = '&lt;h1&gt;Company intranet&lt;/h1&gt;' },
+        },
+    },
+}</pre>
+
+<h2>Your own minigame</h2>
+<p>A minigame is a resource with its own UI that uses the core for server-side checks. This one asks for a 4-digit PIN and tells the player how many digits are right.</p>
+<p><strong>Server</strong></p>
+<pre data-lang="lua">local function register()
+    exports.lc_hack:registerGame('pincode', {
+        check = function(pin, guess)
+            local right = 0
+            for i = 1, #pin do
+                if pin:sub(i, i) == tostring(guess):sub(i, i) then right = right + 1 end
+            end
+            return { correct = guess == pin, feedback = right }
+        end,
+    })
+end
+
+register()
+AddEventHandler('onResourceStart', function(resource)
+    if resource == 'lc_hack' then register() end
+end)
+
+RegisterCommand('pincode', function(source)
+    exports.lc_hack:startGame(source, 'pincode', {
+        secret = ('%04d'):format(math.random(0, 9999)),
+        attempts = 5,
+        time = 60,
+    }, function(success)
+        print(GetPlayerName(source), success and 'won' or 'lost')
+    end)
+end)</pre>
+<p><strong>Client</strong></p>
+<pre data-lang="lua">RegisterNetEvent('lc_hack:game:open', function(name, payload)
+    if name ~= 'pincode' then return end
+    SetNuiFocus(true, true)
+    SendNUIMessage({ action = 'open', attempts = payload.attempts, time = payload.time })
+end)
+
+RegisterNetEvent('lc_hack:game:close', function(name)
+    if name ~= 'pincode' then return end
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action = 'close' })
+end)
+
+RegisterNUICallback('guess', function(guess, cb)
+    cb(lib.callback.await('lc_hack:game:guess', false, guess))
+end)
+
+RegisterNUICallback('close', function(_, cb)
+    SetNuiFocus(false, false)
+    TriggerServerEvent('lc_hack:game:stop')
+    cb('ok')
+end)</pre>
+<p><strong>UI</strong></p>
+<pre data-lang="js">async function guess(pin) {
+    const res = await fetch(`https://${GetParentResourceName()}/guess`, {
+        method: 'POST',
+        body: JSON.stringify(pin),
+    }).then(r => r.json());
+
+    if (res.correct) return showWin();
+    if (res.lost) return showLoss(res.timeout);
+    showHint(`${res.feedback} digits right, ${res.attempts} attempts left`);
+}</pre>
+<p>The guess answer is <code>{ correct, feedback, attempts, lost, timeout }</code>. <code>lc_hack:game:close</code> is only sent when time runs out or <code>stopGame</code> is used; after a win or loss the UI closes itself.</p>
+</article>
+
+<!-- =====================================================================
+     Guides / Networking
+     ===================================================================== -->
+<article data-page="guides/networking" data-crumb="LC Hack / Guides" hidden>
+<h1>Networking</h1>
+<p>Machines are connected through simple /24 networks. Building a network is mostly about choosing IPs and firewalls so the player has to find the right path.</p>
+
+<h2>Rules</h2>
+<ul>
+    <li>Two machines can only reach each other when they have an IP on the same /24 network (the first three numbers match, e.g. <code>10.0.0.x</code>).</li>
+    <li>A machine with several IPs, e.g. <code>{ '10.0.0.12', '192.168.1.10' }</code>, connects two networks. To reach <code>192.168.1.x</code>, the player has to <code>ssh</code> into it first.</li>
+    <li>There is no routing. The servers from <a href="#/config">config.lua</a> are the exception: every machine can reach them, like the internet.</li>
+    <li>Hostnames like <code>db-server</code> are looked up in <code>/etc/hosts</code> on the current machine, then in <code>dns</code> from <a href="#/config">config.lua</a>. Replace <code>/etc/hosts</code> in a machine's <code>files</code> to make a name work in one hack.</li>
+    <li><code>arp</code> remembers every machine the player tried to contact, even when a firewall blocked it.</li>
+</ul>
+
+<h2>Connection errors</h2>
+<div class="table"><table>
+<thead><tr><th>Situation</th><th>ping</th><th>ssh, rdp, curl</th></tr></thead>
+<tbody>
+<tr><td>Not on the same network</td><td><code>Network is unreachable</code></td><td><code>Network is unreachable</code></td></tr>
+<tr><td>No machine on that IP</td><td><code>Destination Host Unreachable</code></td><td><code>No route to host</code></td></tr>
+<tr><td>Blocked by a firewall</td><td>No reply, 100% packet loss</td><td><code>Connection timed out</code> after a delay</td></tr>
+<tr><td>Port missing from <code>ports</code></td><td>-</td><td><code>Connection refused</code></td></tr>
+</tbody></table></div>
+
+<h2>Firewall</h2>
+<pre data-lang="lua">firewall = {
+    allow = { '192.168.1.10' }, -- these IPs may do anything
+    open = { 80 },              -- these ports are open to everyone
+    ping = false,               -- answer ping from everyone
+}</pre>
+<ul>
+    <li>The IP that is checked is the player's IP on the same network as the target.</li>
+    <li><code>nmap</code> shows blocked ports as <code>filtered</code>. A host that answers neither ping nor port 80/443 looks down, and <code>nmap -Pn</code> scans it anyway.</li>
+    <li>As root, the player can change a firewall with <code>ufw disable</code>, <code>ufw allow 22</code> or <code>ufw allow from &lt;ip&gt;</code>. Changes last until the terminal closes.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Guides / Desktops
+     ===================================================================== -->
+<article data-page="guides/desktops" data-crumb="LC Hack / Guides" hidden>
+<h1>Desktops</h1>
+<p>Besides the CLI, a machine can have a graphical desktop. All desktops have the same apps; the look, the app names and the terminal change with the OS.</p>
+
+<div class="gallery">
+<figure><img src="images/lc_hack/desktop-ubuntu.png" alt="The Ubuntu desktop" loading="lazy"><figcaption><code>'ubuntu'</code> - Ubuntu</figcaption></figure>
+<figure><img src="images/lc_hack/desktop-kali.png" alt="The Kali Linux desktop" loading="lazy"><figcaption><code>'kali'</code> - Kali Linux</figcaption></figure>
+<figure><img src="images/lc_hack/desktop-macos.png" alt="The macOS desktop" loading="lazy"><figcaption><code>'macos'</code> - macOS</figcaption></figure>
+<figure><img src="images/lc_hack/desktop-chromeos.png" alt="The ChromeOS desktop" loading="lazy"><figcaption><code>'chromeos'</code> - ChromeOS</figcaption></figure>
+<figure><img src="images/lc_hack/desktop-mint.png" alt="The Linux Mint desktop" loading="lazy"><figcaption><code>'mint'</code> - Linux Mint</figcaption></figure>
+<figure><img src="images/lc_hack/desktop-fedora.png" alt="The Fedora desktop" loading="lazy"><figcaption><code>'fedora'</code> - Fedora</figcaption></figure>
+</div>
+
+<div class="table"><table>
+<thead><tr><th>desktop</th><th>Look</th><th>Terminal prompt</th><th>Files</th><th>Editor</th><th>Images</th><th>Browser</th><th>Monitor</th></tr></thead>
+<tbody>
+<tr><td><code>'ubuntu'</code></td><td>Top bar, dock on the left, purple terminal</td><td><code>alex@pc:~$</code></td><td>Files</td><td>Text Editor</td><td>Image Viewer</td><td>Firefox</td><td>System Monitor</td></tr>
+<tr><td><code>'kali'</code></td><td>Dark top panel with apps, blue accents</td><td><code>┌──(alex㉿pc)-[~]</code><br><code>└─$</code></td><td>Thunar</td><td>Mousepad</td><td>Ristretto</td><td>Firefox ESR</td><td>Task Manager</td></tr>
+<tr><td><code>'macos'</code></td><td>Menu bar, floating dock, traffic lights, white terminal</td><td><code>alex@pc ~ %</code></td><td>Finder</td><td>TextEdit</td><td>Preview</td><td>Safari</td><td>Activity Monitor</td></tr>
+<tr><td><code>'chromeos'</code></td><td>Shelf at the bottom, rounded windows</td><td><code>alex@pc:~$</code></td><td>Files</td><td>Text</td><td>Gallery</td><td>Chrome</td><td>Task Manager</td></tr>
+<tr><td><code>'mint'</code></td><td>Panel at the bottom, green accents</td><td><code>alex@pc:~$</code></td><td>Nemo</td><td>Xed</td><td>Xviewer</td><td>Firefox</td><td>System Monitor</td></tr>
+<tr><td><code>'fedora'</code></td><td>Top bar, floating dash, close button only</td><td><code>[alex@pc ~]$</code></td><td>Files</td><td>Text Editor</td><td>Image Viewer</td><td>Firefox</td><td>System Monitor</td></tr>
+<tr><td><code>'random'</code></td><td colspan="7">One of the six, picked every time the terminal opens</td></tr>
+</tbody></table></div>
+<p>The prompt follows the machine the player is logged in to: <code>ssh</code> from a Mac to a server without a desktop gives the bash prompt <code>user@host:~$</code>.</p>
+
+<h2>Access</h2>
+<ul>
+    <li>If the player's own machine has a <code>desktop</code>, the hack starts on it.</li>
+    <li><code>startx</code> opens the desktop of the current machine.</li>
+    <li><code>rdp [user@]host</code> opens a remote desktop on another machine. It needs port <code>5900</code>, goes through the firewall and asks for the user's <code>password</code>, checked by the server.</li>
+    <li>The power button closes the desktop. If it was opened with <code>rdp</code>, it also logs off that machine.</li>
+</ul>
+<p>A machine with a <code>desktop</code> and no <code>ports</code> gets <code>{ 22, 5900 }</code>. When you set <code>ports</code> yourself, add <code>5900</code> if <code>rdp</code> should work.</p>
+
+<h2>Apps</h2>
+<ul>
+    <li><strong>Terminal</strong> - the real CLI in a window. It shares the login stack, so <code>ssh</code>, <code>su</code> and everything else works. Closing the window keeps its history.</li>
+    <li><strong>Files</strong> - browse the desktop machine's files, with Home, Desktop, Documents, Downloads, Pictures and <code>/</code> in the sidebar. Double click opens a folder, an image in the image viewer and anything else in the editor. Drag files onto a folder, another window or the desktop to move them. Locked files show a lock and an error dialog.</li>
+    <li><strong>Text Editor</strong> - opens, edits and saves files. Save with the button or <code>Ctrl+S</code>. The path field decides where the file is saved; relative paths start in the home directory, and new files go to the desktop. Users can save in their home directory and <code>/tmp</code>, root everywhere.</li>
+    <li><strong>Image viewer</strong> - shows the images in a folder with previous / next. Opened from the dock, it starts in <code>~/Pictures</code>.</li>
+    <li><strong>Browser</strong> - works like <code>curl</code> from the desktop's machine: same <code>/etc/hosts</code>, network and firewall. <code>http://10.0.0.30/</code> shows <code>/var/www/html/index.html</code> on that machine, <code>http://web01/notes.txt</code> shows <code>/var/www/html/notes.txt</code>. Pages are sandboxed, scripts never run.</li>
+    <li><strong>System monitor</strong> - the same processes as <code>ps aux</code>.</li>
+</ul>
+<h2>The desktop is ~/Desktop</h2>
+<p>The icons on the desktop are the files in <code>~/Desktop</code> of the desktop's user. Anything saved or moved there (editor, <code>echo &gt;</code>, <code>touch</code>, <code>mv</code>, drag and drop) shows up on the desktop right away, and files dragged onto the desktop are moved to <code>~/Desktop</code>.</p>
+<h2>Images</h2>
+<p>An image is any file ending in <code>.png</code>, <code>.jpg</code>, <code>.jpeg</code>, <code>.gif</code>, <code>.svg</code> or <code>.webp</code>. What the file contains decides what is shown:</p>
+<ul>
+    <li><code>'https://...'</code> or <code>'data:image/...'</code> - that image.</li>
+    <li><code>'&lt;svg ...&gt;...&lt;/svg&gt;'</code> - the SVG. Handy for hiding a hint in a picture, e.g. a sticky note with text.</li>
+    <li>Anything else - a landscape generated from the file name.</li>
+</ul>
+<p>Windows can be moved by their title bar, minimized (the dock brings them back), maximized (or double click the title bar) and closed. The apps always use the desktop's machine, even after <code>ssh</code>-ing elsewhere in the terminal.</p>
+</article>
+
+<!-- =====================================================================
+     Guides / Screens
+     ===================================================================== -->
+<article data-page="guides/screens" data-crumb="LC Hack / Guides" hidden>
+<h1>Screens</h1>
+<p>A terminal can have a screen in the world. While a player hacks the terminal, everyone near the screen sees the terminal and desktop in real time, using a Direct-Rendered UI (DUI).</p>
+
+<h2>Setup</h2>
+<p>Add <code>screen</code> to <a href="#/functions/server/createterminal">createTerminal</a>.</p>
+<pre data-lang="lua">exports.lc_hack:createTerminal({
+    name = 'bank_server',
+    coords = vec3(253.1, 228.4, 101.7),
+    screen = {
+        coords = vec3(252.4, 229.6, 102.4), -- the center of the screen
+        heading = 340.0,                    -- your heading while looking at the screen
+        width = 1.2,                        -- meters, the height follows 16:9
+    },
+    config = config,
+})</pre>
+<p>The easiest way to find the values is to stand in front of the spot, look at it, and use your own coordinates and heading. <code>/hackterminal</code> does exactly that and places a screen 1.5 meters in front of you.</p>
+<p>Leave out <code>coords</code> to put the terminal on the screen itself. Players then look at the screen and use it with ox_target (or <code>[E]</code> close to it) to start hacking.</p>
+<pre data-lang="lua">exports.lc_hack:createTerminal({
+    name = 'lobby_screen',
+    screen = { coords = vec3(252.4, 229.6, 102.4), heading = 340.0, width = 1.6 },
+    config = config,
+})</pre>
+<p>The screen is a flat surface drawn in the world, so it can be placed on any wall, monitor or prop. It is meant to be seen from the front.</p>
+
+<h2>How it works</h2>
+<ol>
+    <li>When a hack starts from a terminal with a screen, the hacker's window is copied every time it changes, at most a few times per second.</li>
+    <li>The copy is sent to the server with latent events, so large updates never block other network traffic.</li>
+    <li>The server only accepts updates from the player hacking that terminal, and forwards them to players near the screen.</li>
+    <li>Nearby clients run <code>web/index.html?mirror</code> as a DUI through <code>lib.dui</code> and draw it on the screen. The DUI is only created within <code>distance</code> and removed again when the player walks away.</li>
+    <li>When the hack ends, the result stays on the screen for 5 seconds before it goes back to idle.</li>
+</ol>
+
+<h2>Security</h2>
+<ul>
+    <li>The password field is always sent empty, so passwords typed by the hacker are never shown to anyone.</li>
+    <li>The HTML comes from another player, so the screen removes everything except the elements and attributes the terminal uses. Scripts, images, event handlers and <code>url()</code> in styles are dropped.</li>
+    <li>The server rejects updates larger than 100 KB and more than 10 updates per second from one player.</li>
+</ul>
+</article>
+
+<!-- =====================================================================
+     Guides / Commands
+     ===================================================================== -->
+<article data-page="guides/commands" data-crumb="LC Hack / Guides" hidden>
+<h1>Commands</h1>
+<p>Everything a player can type in the terminal. Every wrong password counts as one attempt, no matter if it was <code>ssh</code>, <code>rdp</code>, <code>su</code> or <code>sudo</code>.</p>
+
+<img class="shot" src="images/lc_hack/terminal.png" alt="Reading a mail, logging in with ssh and scanning a network" loading="lazy">
+
+<h2>Files</h2>
+<div class="table"><table>
+<thead><tr><th>Command</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>ls [-a] [-l] [path]</code></td><td>List files. <code>-a</code> shows hidden files, <code>-l</code> shows permissions, owner and size.</td></tr>
+<tr><td><code>la</code>, <code>ll</code></td><td>Shortcuts for <code>ls -a</code> and <code>ls -la</code>.</td></tr>
+<tr><td><code>cd [path]</code>, <code>pwd</code></td><td>Change or print the current directory. Supports <code>..</code>, <code>/</code> and <code>~</code>.</td></tr>
+<tr><td><code>cat &lt;file...&gt;</code></td><td>Print one or more files.</td></tr>
+<tr><td><code>head &lt;file&gt;</code>, <code>tail &lt;file&gt;</code></td><td>First or last 10 lines.</td></tr>
+<tr><td><code>echo &lt;text&gt; &gt; &lt;file&gt;</code>, <code>echo &lt;text&gt; &gt;&gt; &lt;file&gt;</code></td><td>Write text to a file, or add it as a new line. Users can write in their home directory and <code>/tmp</code>, root everywhere.</td></tr>
+<tr><td><code>touch &lt;file&gt;</code></td><td>Create an empty file.</td></tr>
+<tr><td><code>mkdir [-p] &lt;dir&gt;</code></td><td>Create a folder. <code>-p</code> creates the folders on the way too.</td></tr>
+<tr><td><code>rm [-r] &lt;file&gt;</code></td><td>Delete a file, or a folder with <code>-r</code>.</td></tr>
+<tr><td><code>mv &lt;from&gt; &lt;to&gt;</code></td><td>Move or rename a file or folder.</td></tr>
+<tr><td><code>grep &lt;text&gt; &lt;file&gt;</code></td><td>Lines containing the text.</td></tr>
+<tr><td><code>find [path] [-name pattern]</code></td><td>Find files. <code>*</code> is a wildcard, e.g. <code>find / -name *.sh</code>.</td></tr>
+<tr><td><code>file &lt;file&gt;</code></td><td>File type: ASCII text, shell script, ELF, image, directory.</td></tr>
+<tr><td><code>wc &lt;file&gt;</code></td><td>Lines, words and characters.</td></tr>
+<tr><td><code>strings &lt;file&gt;</code></td><td>Readable text inside a binary file.</td></tr>
+<tr><td><code>base64 [-d] &lt;file | text&gt;</code></td><td>Encode or decode base64. If the file doesn't exist, the argument is used as text.</td></tr>
+</tbody></table></div>
+
+<h2>System</h2>
+<div class="table"><table>
+<thead><tr><th>Command</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>whoami</code>, <code>id</code></td><td>The current user.</td></tr>
+<tr><td><code>hostname [-I]</code></td><td>The machine's name, or its IPs with <code>-I</code>.</td></tr>
+<tr><td><code>uname [-a]</code>, <code>date</code></td><td>System information.</td></tr>
+<tr><td><code>ps aux</code></td><td>Running processes, including the machine's <code>processes</code>.</td></tr>
+<tr><td><code>crontab -l</code></td><td>The user's crontab (<code>/var/spool/cron/crontabs/&lt;user&gt;</code>), or <code>/etc/crontab</code> as root.</td></tr>
+<tr><td><code>history</code>, <code>echo</code>, <code>clear</code>, <code>help</code></td><td>Command history, print text, clear the screen, list commands.</td></tr>
+</tbody></table></div>
+
+<h2>Network</h2>
+<div class="table"><table>
+<thead><tr><th>Command</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>ifconfig</code>, <code>ip a</code></td><td>Network interfaces and IPs.</td></tr>
+<tr><td><code>ip r</code></td><td>Networks the machine can reach.</td></tr>
+<tr><td><code>ping [-c count] &lt;host&gt;</code></td><td>Ping an IP or hostname, 4 packets by default.</td></tr>
+<tr><td><code>nmap [-Pn] [-sn] &lt;host | net/24&gt;</code></td><td>Scan ports, or find hosts on a network with e.g. <code>nmap 10.0.0.0/24</code>.</td></tr>
+<tr><td><code>arp</code></td><td>Machines this machine has been in contact with.</td></tr>
+<tr><td><code>netstat</code></td><td>Ports this machine listens on.</td></tr>
+<tr><td><code>curl &lt;host&gt;[:port]</code></td><td>Fetch the web page of a machine with port 80.</td></tr>
+<tr><td><code>ssh [user@]host</code></td><td>Log in to another machine.</td></tr>
+<tr><td><code>rdp [user@]host</code></td><td>Remote desktop to a machine with a <code>desktop</code>.</td></tr>
+<tr><td><code>ufw status | enable | disable | allow &lt;port&gt; | allow from &lt;ip&gt;</code></td><td>Manage the firewall. Root only.</td></tr>
+</tbody></table></div>
+
+<h2>Access</h2>
+<div class="table"><table>
+<thead><tr><th>Command</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>su</code></td><td>Become root with the <code>rootPassword</code>. Root on the target wins.</td></tr>
+<tr><td><code>sudo &lt;command&gt;</code></td><td>Run one command as root, e.g. <code>sudo cat /etc/shadow</code>. <code>sudo su</code> and <code>sudo -i</code> give a root shell.</td></tr>
+<tr><td><code>startx</code></td><td>Open the desktop of the current machine.</td></tr>
+<tr><td><code>exit</code>, <code>logout</code></td><td>Log out: root to user, ssh back to the previous machine. On the player's own machine it closes the window, like <code>Escape</code>.</td></tr>
+</tbody></table></div>
+<p><code>ssh</code> with the wrong username, e.g. <code>root@...</code>, never works, like <code>PermitRootLogin no</code>.</p>
+
+<h2>Keys</h2>
+<div class="table"><table>
+<thead><tr><th>Key</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>Tab</code></td><td>Complete commands and paths. Lists every option when there are several.</td></tr>
+<tr><td><code>Up</code>, <code>Down</code></td><td>Browse previous commands.</td></tr>
+<tr><td><code>Enter</code></td><td>Run the command or submit the password.</td></tr>
+<tr><td><code>Escape</code></td><td>Close the window. Everything is kept until you walk away from the computer.</td></tr>
+</tbody></table></div>
+</article>
+
+<!-- =====================================================================
+     Guides / Development
+     ===================================================================== -->
+<article data-page="guides/development" data-crumb="LC Hack / Guides" hidden>
+<h1>Development</h1>
+<p>How lc_hack is put together, how to test changes without FiveM, and where to add your own commands, apps and desktops.</p>
+
+<h2>Structure</h2>
+<div class="table"><table>
+<thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+<tbody>
+<tr><td><code>server/main.lua</code></td><td>Entry point, requires the modules below.</td></tr>
+<tr><td><code>server/api.lua</code></td><td>Exports and LuaLS types.</td></tr>
+<tr><td><code>server/session.lua</code></td><td>Running hacks: passwords, attempts, win and loss.</td></tr>
+<tr><td><code>server/terminal.lua</code></td><td>Terminals in the world and the distance check.</td></tr>
+<tr><td><code>config.lua</code>, <code>server/servers.lua</code></td><td>Always-on servers, DNS and their websites (in <code>websites/</code>).</td></tr>
+<tr><td><code>server/commands.lua</code></td><td>Test commands and the example config.</td></tr>
+<tr><td><code>client/main.lua</code></td><td>Entry point, requires the modules below.</td></tr>
+<tr><td><code>client/api.lua</code></td><td>Client exports.</td></tr>
+<tr><td><code>client/terminal.lua</code></td><td>Opens and closes the NUI and forwards password attempts.</td></tr>
+<tr><td><code>client/zones.lua</code></td><td>ox_target zones or ox_lib points.</td></tr>
+<tr><td><code>client/screens.lua</code></td><td>In-world screens: creates DUIs near the player and draws them.</td></tr>
+<tr><td><code>web/js/mirror.js</code></td><td>Sends the hacker's window to the screen, and shows it in mirror mode.</td></tr>
+<tr><td><code>web/js/terminal/</code></td><td>Machines, filesystem, networking, firewall, Tab and history. One file per part, loaded in order by <code>web/index.html</code>.</td></tr>
+<tr><td><code>web/js/terminal/commands/</code></td><td>The commands, one file per group. Add a command with <code>Object.assign(commands, { ... })</code>.</td></tr>
+<tr><td><code>web/js/desktop/</code></td><td>Desktops (<code>themes.js</code>, <code>desktop.js</code>), windows and the apps in <code>apps/</code>.</td></tr>
+<tr><td><code>web/js/dev.js</code></td><td>Browser test mode: stands in for the client and server outside FiveM, and reads the Lua configs.</td></tr>
+<tr><td><code>web/css/</code></td><td>The CLI, screens, the shared desktop layout and one file per desktop theme in <code>desktop/themes/</code>.</td></tr>
+</tbody></table></div>
+<p>New client files must be listed in <code>files</code> in <code>fxmanifest.lua</code>, otherwise <code>require</code> can't find them.</p>
+
+<h2>Flow</h2>
+<ol>
+    <li>The player uses a terminal and the client triggers <code>lc_hack:use</code>. The server checks the distance and starts a session.</li>
+    <li>The server sends the config <strong>without passwords</strong> with <code>lc_hack:open</code>.</li>
+    <li>When the player submits a password, <code>web/js/terminal/auth.js</code> sends it through the NUI to <code>client/terminal.lua</code> and on to <code>lc_hack:verify</code>.</li>
+    <li>The server checks it, counts attempts and decides the outcome. The answer goes back to the NUI.</li>
+    <li>When the hack ends, the server calls <code>onSuccess</code>, <code>onFail</code> or the <code>cb</code> from <code>startHack</code>.</li>
+</ol>
+
+<p>The events between client and server are listed in <a href="#/events/internal-events">Events</a>.</p>
+
+<h2>Testing in the browser</h2>
+<p>Run <code>python3 -m http.server 8000</code> in the resource folder and open <code>http://localhost:8000/web/</code>. <code>web/js/dev.js</code> stands in for the client and server: it reads <code>config.lua</code> and the example in <code>server/commands.lua</code>, checks passwords like the server and keeps changes on the always-on servers in the browser. Add <code>?desktop=macos</code> (or any desktop, <code>random</code>, <code>none</code>) to pick the desktop, and <code>?hack=../my_heist/hacks/office.lua</code> to open your own hack, see <a href="#/guides/hack/test-it-in-the-browser">Creating a Hack</a>. In FiveM the file does nothing.</p>
+
+<h2>Adding a command</h2>
+<p>Commands live in <code>web/js/terminal/commands/</code>, one file per group. Add a function to <code>commands</code>; it receives the words after the command as a list and works with Tab automatically. Add it to <code>help</code> as well.</p>
+<pre data-lang="js">// web/js/terminal/commands/tools.js
+Object.assign(commands, {
+    // "whois 10.0.0.5" -> args = ['10.0.0.5']
+    whois(args) {
+        const m = findMachine(args[0]);
+        print(m ? `${args[0]} is ${m.host}` : 'whois: unknown host');
+    },
+});</pre>
+
+<h2>Adding a desktop app</h2>
+<p>An app is one file in <code>web/js/desktop/apps/</code> plus a <code>&lt;script&gt;</code> line in <code>web/index.html</code>. It registers itself with its name and icon, and the name or icon per desktop where they differ. The dock shows apps in the order of the script lines. Icons are Font Awesome classes, styles go in <code>web/css/desktop/apps.css</code>.</p>
+<pre data-lang="js">// web/js/desktop/apps/calculator.js
+registerApp('calculator', {
+    open: openCalculator,
+    name: 'Calculator', names: { kali: 'Galculator' },
+    icon: 'fa-solid fa-calculator',
+});
+
+function openCalculator() {
+    const body = el('div', 'calculator', '2 + 2 = 4');
+    createWindow(appName('calculator'), body, { width: 260, height: 160, app: 'calculator' });
+}</pre>
+
+<h2>Adding a desktop</h2>
+<ol>
+    <li>Add an entry to <code>THEMES</code> in <code>web/js/desktop/themes.js</code> (its process, menu, names of Home, Trash and <code>/</code>).</li>
+    <li>Add <code>web/css/desktop/themes/&lt;name&gt;.css</code> and a <code>&lt;link&gt;</code> to it in <code>web/index.html</code>. Copy an existing theme: it sets the colour variables, places <code>.panel</code> and <code>.dock</code>, styles the window buttons and the terminal (<code>#term[data-os="&lt;name&gt;"]</code>).</li>
+    <li>Optional: a prompt in <code>PROMPTS</code> in <code>web/js/terminal/prompt.js</code> (bash is the default), and app names in the apps.</li>
+</ol>
+
+<h2>Helpers</h2>
+<div class="table"><table>
+<thead><tr><th>Function</th><th>File (web/js/)</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>print(text)</code></td><td>terminal/helpers.js</td><td>Prints a line, never as HTML. Returns the line.</td></tr>
+<tr><td><code>printSlow(lines, ms, done?)</code></td><td>terminal/helpers.js</td><td>Prints lines with a delay. <code>null</code> waits without printing.</td></tr>
+<tr><td><code>readFile(cmd, path)</code></td><td>terminal/filesystem.js</td><td>A file's text, or prints an error and returns <code>undefined</code>.</td></tr>
+<tr><td><code>resolve(path)</code></td><td>terminal/filesystem.js</td><td>Path to a list, e.g. <code>'~/x'</code> to <code>['home', 'alex', 'x']</code>.</td></tr>
+<tr><td><code>getNode(list)</code></td><td>terminal/filesystem.js</td><td>Object = folder, string = file, <code>null</code> = locked, <code>undefined</code> = missing.</td></tr>
+<tr><td><code>writeFile</code>, <code>makeDir</code>, <code>removeFile</code>, <code>moveFile</code></td><td>terminal/filesystem.js</td><td>Change files with the current login's permissions. Return an error text or <code>null</code>. Changes on always-on servers are sent to the server.</td></tr>
+<tr><td><code>withSession(session, fn)</code></td><td>terminal/machines.js</td><td>Runs <code>fn</code> as another login.</td></tr>
+<tr><td><code>lookup(name)</code></td><td>terminal/network.js</td><td>A name to an IP: <code>/etc/hosts</code>, then DNS from <code>config.lua</code>.</td></tr>
+<tr><td><code>reach(ip, port)</code></td><td>terminal/network.js</td><td><code>{ status, machine, src }</code>, <code>port</code> is a number or <code>'icmp'</code>.</td></tr>
+<tr><td><code>findMachine(ip)</code></td><td>terminal/network.js</td><td>The machine with that IP.</td></tr>
+<tr><td><code>pageFile(machine, path)</code></td><td>terminal/network.js</td><td>A file from the machine's web root, as the browser and <code>curl</code> see it.</td></tr>
+<tr><td><code>askPassword(label, prompt, onValue)</code></td><td>terminal/auth.js</td><td>Asks for a password.</td></tr>
+<tr><td><code>verify(machine, kind, user, value, ok, failText)</code></td><td>terminal/auth.js</td><td>Sends a password attempt to the server.</td></tr>
+<tr><td><code>openDesktop(session, remote)</code>, <code>closeDesktop()</code></td><td>desktop/desktop.js</td><td>Opens or closes the desktop.</td></tr>
+<tr><td><code>createWindow(title, element, options)</code></td><td>desktop/window.js</td><td>A window that can be moved, minimized, maximized and closed.</td></tr>
+<tr><td><code>showError(text)</code></td><td>desktop/window.js</td><td>An error dialog.</td></tr>
+<tr><td><code>openFile(path)</code></td><td>desktop/apps/files.js</td><td>Opens a file in the right app.</td></tr>
+</tbody></table></div>
+
+<h2>Default files and ports</h2>
+<ul>
+    <li>Add default files in <code>defaultFiles()</code> in <code>web/js/terminal/default-files.js</code>. A path ending with <code>/</code> is an empty folder, and <code>user</code>, <code>host</code> and <code>ips</code> can be used in the text.</li>
+    <li>Lock a default file by adding its path to <code>DEFAULT_LOCKED</code>.</li>
+    <li>Name a port for <code>nmap</code> in <code>SERVICES</code> in <code>web/js/terminal/state.js</code>.</li>
+</ul>
+
+<h2>Limitations</h2>
+<ul>
+    <li>No pipes (<code>|</code>). Redirection only works with <code>echo</code>.</li>
+    <li>Every hack is its own world: files written on a machine in a hack are gone when it ends. Only the servers from <a href="#/config">config.lua</a> keep changes and share them.</li>
+    <li><code>grep</code> works on a single file and is case-sensitive.</li>
+    <li>One desktop at a time. <code>rdp</code> to another machine closes the current one.</li>
+    <li>One hack per player at a time, and no cooldown on terminals.</li>
+</ul>
+</article>
