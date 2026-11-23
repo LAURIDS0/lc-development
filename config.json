@@ -45,6 +45,28 @@
       }
     },
     {
+      "fullLink": "https://github.com/LAURIDS0/lc_keyclone",
+      "name": "LC Keyclone",
+      "description": "Clone vehicle keys and door keycards with a key cloner. Built on LC Hack.",
+      "readmeBranch": "main",
+      "docs": "docs/#/lc_keyclone",
+      "tags": [
+        "FiveM",
+        "Free",
+        "Hacking"
+      ],
+      "image": {
+        "src": "images/lc_keyclone.png",
+        "name": "Free",
+        "alt": "lc_keyclone preview",
+        "position": "center",
+        "width": 640,
+        "height": 360,
+        "objectFit": "contain",
+        "objectPosition": "center"
+      }
+    },
+    {
       "fullLink": "https://github.com/LAURIDS0/lc_jobgarages",
       "name": "LC Job Garages",
       "description": "A simple job garages script for FiveM.",

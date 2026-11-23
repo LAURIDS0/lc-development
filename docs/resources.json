@@ -20,6 +20,16 @@
         "updated": "November 23, 2026"
     },
     {
+        "id": "lc_keyclone",
+        "name": "LC Keyclone",
+        "icon": "fa-solid fa-key",
+        "description": "Clone vehicle keys and door keycards with a key cloner. Built on LC Hack.",
+        "status": "released",
+        "github": "https://github.com/LAURIDS0/lc_keyclone",
+        "image": "images/lc_keyclone/device.png",
+        "updated": "November 23, 2026"
+    },
+    {
         "id": "lc_jobgarages",
         "name": "LC Job Garages",
         "icon": "fa-solid fa-truck-medical",
@@ -48,19 +58,5 @@
         "image": "../images/lc_els.png",
         "status": "released",
         "updated": "August 22, 2026"
-    },
-    {
-        "id": "lc_keyclone",
-        "name": "LC Keyclone",
-        "icon": "fa-solid fa-key",
-        "description": "Coming soon. Built on LC Hack.",
-        "status": "soon"
-    },
-    {
-        "id": "lc_cardhack",
-        "name": "LC Cardhack",
-        "icon": "fa-solid fa-credit-card",
-        "description": "Coming soon. Built on LC Hack.",
-        "status": "soon"
     }
 ]
